@@ -73,6 +73,13 @@
 * `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/stdlib/os/__init__.py`
 * `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/stdlib/os/env.gs`
 
+#### docs 
+'https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/docs/bucles.gs'
+'https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/docs/declarar_variables.gs'
+'https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/docs/estructura_de_condicionales.gss'
+'https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/docs/funciones_natibas_del_motor.gs'
+'https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/docs/funciones_y_retornos.gs'
+
 ---
 
 ### 📂 Terceros y Nodos (`thirdparty/`)
