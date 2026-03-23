@@ -71,7 +71,7 @@ pip install pygame PyQt6
 Ejecuta el launcher para crear un nuevo proyecto de videojuego automatizado:
 
 ```bash
-python egas_launcher.py
+python run.py
 ```
 
 ### 3. Escribir Scripts GOS
