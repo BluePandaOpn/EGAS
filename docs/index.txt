@@ -1,84 +1,114 @@
 =========================================================
-      GUÍA DE CREACIÓN DE ESCENAS (.dscn) PARA EGAS
+EGAS - MAPA DE DOCUMENTACION Y RUTAS
 =========================================================
 
-Este documento describe el formato estándar de archivos de escena (.dscn)
-para el motor EGAS. El formato está inspirado en .tscn de Godot, adaptado 
-al sistema de nodos de EGAS y a los scripts del lenguaje GOS.
-
-Un archivo .dscn es texto plano dividido en tres conceptos:
-  1. Recursos externos ([ext_resource])
-  2. Definición de Nodos ([node])
-  3. Propiedades de los nodos (clave = valor)
+Este archivo sirve como indice rapido.
+Usa docs/*.md para leer la documentacion completa.
 
 ---------------------------------------------------------
-1. ESTRUCTURA Y SINTAXIS GENERAL
+1. DOCUMENTOS PRINCIPALES
 ---------------------------------------------------------
 
-Regla Básica:
-- Las secciones principales van entre corchetes: [seccion]
-- Los comentarios usan la almohadilla: #
-- Las propiedades van debajo de su respectivo nodo en formato: variable = valor
-
-Ejemplo de sintaxis:
-
-# --- 📦 RECURSOS EXTERNOS ---
-# Se usan para precargar scripts GOS y Texturas pesadas en memoria.
-[ext_resource path="lib/gos/docs/funciones_natibas_del_motor.gs" id="res_logica_nave"]
-[ext_resource path="assets/nave.png" id="res_textura_nave"]
-
-
-# --- 🌳 ÁRBOL DE NODOS ---
-
-# 🔹 Nodo Raíz (No tiene parámetro 'parent')
-[node name="MundoExterior" type="Node"]
-
-# 🔹 Nodo Interfaz (Hijo directo de MundoExterior)
-[node name="CapaUI" type="Control" parent="MundoExterior"]
-
-# 🔹 Nodo Texto (Hijo de CapaUI usando la ruta de herencia jerárquica)
-[node name="LabelPuntos" type="Label" parent="MundoExterior/CapaUI"]
-text = "Puntuación: 0"
-position_x = 20
-position_y = 20
-
-# 🔹 Nodo Físico del Jugador con script GOS adjunto
-[node name="NaveJugador" type="CharacterBody2D" parent="MundoExterior"]
-position_x = 400
-position_y = 300
-script = "res_logica_nave"
-
-# 🔹 Sprite visual de la nave (Hijo de la Nave física)
-[node name="VisualNave" type="Sprite2D" parent="MundoExterior/NaveJugador"]
-texture = "res_textura_nave"
-
+README.md
+docs/README.md
+docs/getting-started.md
+docs/engine.md
+docs/scenes.md
+docs/nodes.md
+docs/gos-language.md
+docs/gos-stdlib.md
+docs/Ruete_ia_aprender_lang.md
+docs/Ruete_ia_aprender_lang.txt
 
 ---------------------------------------------------------
-2. LÓGICA DE CARGA EN EL MOTOR (egas/scene/parser.py)
+2. RUTA DE APRENDIZAJE RECOMENDADA
 ---------------------------------------------------------
 
-Para que la lectura sea sencilla y ligera, el 'parser.py' del motor debe 
-ejecutar secuencialmente estos tres pasos al leer el archivo línea por línea:
-
-PASO 1: Registro de recursos
-  - Al encontrar `[ext_resource path="ruta" id="mi_id"]`, el motor guarda 
-    en un diccionario de python la ruta física: `recursos["mi_id"] = "ruta"`.
-
-PASO 2: Instanciación de Nodos
-  - Al encontrar `[node name="X" type="Y"]`, el motor busca la clase en la 
-    carpeta `thirdparty/nodes/` instanciando el objeto dinámicamente con Python.
-  - Se guarda el nodo en un diccionario temporal de la escena `nodos_vivos["X"] = objeto`.
-
-PASO 3: Jerarquía y Propiedades
-  - Si el parámetro `parent="Padre"` existe, el motor busca al padre en `nodos_vivos`
-    y le aplica el método nativo de EGAS: `padre.add_child(nodo_actual)`.
-  - Las líneas de propiedades (ej: `position_x = 300`) se aplican inmediatamente 
-    sobre el último nodo instanciado usando `setattr(nodo_actual, "position_x", 300)`.
+1) README.md
+2) docs/getting-started.md
+3) docs/engine.md
+4) docs/scenes.md
+5) docs/nodes.md
+6) docs/gos-language.md
+7) docs/gos-stdlib.md
+8) example/snake/
 
 ---------------------------------------------------------
-3. VENTAJAS DE ESTA LÓGICA SENSATA
+3. RUTAS LOCALES IMPORTANTES DEL MOTOR
 ---------------------------------------------------------
-✅ Lectura secuencial rápida línea a línea sin necesidad de librerías de terceros complejas.
-✅ Al usar strings para apuntar a los IDs de recursos se evita recargar el disco duro.
-✅ Totalmente escalable: Si creas nuevos Nodos2D o Node3D, el formato .dscn los leerá 
-   automáticamente sin modificar el parseador de escenas.
+
+config/settings.py
+run.py
+egas/core/engine.py
+egas/render/server.py
+egas/scene/parser.py
+egas/scene/tree.py
+egas/scene/script.py
+lib/gos/runtime/interpreter.py
+lib/gos/runtime/builtins.py
+thirdparty/input_system.py
+
+---------------------------------------------------------
+4. RUTAS LOCALES IMPORTANTES DEL LENGUAJE GOS
+---------------------------------------------------------
+
+lib/gos/lexer/lexer.py
+lib/gos/lexer/token.py
+lib/gos/parser/parser.py
+lib/gos/parser/ast.py
+lib/gos/runtime/environment.py
+lib/gos/runtime/interpreter.py
+lib/gos/runtime/builtins.py
+lib/gos/docs/
+lib/gos/stdlib/
+
+---------------------------------------------------------
+5. RUTAS LOCALES IMPORTANTES DE NODOS
+---------------------------------------------------------
+
+thirdparty/nodes/base/node.py
+thirdparty/nodes/node2d/node2d.py
+thirdparty/nodes/node2d/visuals/sprite_2d.py
+thirdparty/nodes/node2d/visuals/animated_sprite_2d.py
+thirdparty/nodes/node2d/physics/area_2d.py
+thirdparty/nodes/node2d/physics/character_body_2d.py
+thirdparty/nodes/node2d/shapes/collision_shape_2d.py
+thirdparty/nodes/control/control.py
+thirdparty/nodes/control/label.py
+thirdparty/nodes/control/button.py
+thirdparty/nodes/control/canvas_layer.py
+thirdparty/nodes/control/color_rect.py
+thirdparty/nodes/audio_player.py
+thirdparty/nodes/timers/timer.py
+
+---------------------------------------------------------
+6. PROYECTO DE EJEMPLO
+---------------------------------------------------------
+
+example/snake/proyecto.egas
+example/snake/scenes/nivel1.dscn
+example/snake/scripts/
+example/snake/assets/
+
+---------------------------------------------------------
+7. RUTAS RAW DE GITHUB
+---------------------------------------------------------
+
+Plantilla base:
+https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/
+
+Ejemplos:
+https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/README.md
+https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/run.py
+https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/core/engine.py
+https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/scene/parser.py
+https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/runtime/interpreter.py
+https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node2d/node2d.py
+https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/docs/README.md
+
+---------------------------------------------------------
+8. NOTA
+---------------------------------------------------------
+
+El README raiz es para informacion basica.
+La carpeta docs/ es para la documentacion completa del motor y del lenguaje.

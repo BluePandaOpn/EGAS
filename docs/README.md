@@ -1,66 +1,27 @@
-# 🚀 EGAS Engine V2.0 & GOS Scripting Language
+# Documentacion de EGAS
 
-**EGAS Engine** es un motor de videojuegos en 2D desarrollado en Python utilizando **Pygame**, orientado a la arquitectura de nodos (similar a Godot). Cuenta con su propio lenguaje de programación integrado: **GOS (Game Object Scripting)**.
+Esta carpeta contiene la documentacion formal del motor y del lenguaje GOS.
 
-Este repositorio contiene el núcleo del motor, el transpilador del lenguaje, la librería estándar de matemáticas e Input/Output, y un Launcher automatizado visual en **PyQt6**.
+## Orden recomendado
 
----
+1. [`getting-started.md`](getting-started.md)
+2. [`engine.md`](engine.md)
+3. [`scenes.md`](scenes.md)
+4. [`nodes.md`](nodes.md)
+5. [`gos-language.md`](gos-language.md)
+6. [`gos-stdlib.md`](gos-stdlib.md)
+7. [`Ruete_ia_aprender_lang.md`](Ruete_ia_aprender_lang.md)
 
-## 🛠️ Características Principales
+## Contenido
 
-### 🛸 EGAS Engine (El Motor)
-* **Arquitectura de Nodos:** Jerarquías visuales (`Node2D`, `Sprite2D`, `CollisionShape2D`).
-* **Físicas AABB Integradas:** Colisiones elásticas y cajas delimitadoras rápidas de calcular.
-* **Launcher en PyQt6:** Interfaz gráfica para crear y lanzar proyectos con un solo click.
-* **Auto-Geolocalización:** El motor sabe dónde está instalado y auto-configura las rutas de los proyectos creados.
+- [`getting-started.md`](getting-started.md): como instalar, ejecutar y entender la estructura minima.
+- [`engine.md`](engine.md): arquitectura del runtime, render, fisicas, escenas y launcher.
+- [`scenes.md`](scenes.md): formato de escenas `.dscn`, propiedades y buenas practicas.
+- [`nodes.md`](nodes.md): catalogo de nodos disponibles y su uso.
+- [`gos-language.md`](gos-language.md): sintaxis, ciclo de vida y forma de programar con GOS.
+- [`gos-stdlib.md`](gos-stdlib.md): funciones globales del runtime y stdlib actual.
+- [`index.txt`](index.txt): mapa rapido de rutas locales y rutas raw.
 
-### 📜 GOS Language (El Lenguaje de Scripting)
-* **Sintaxis de estilo C/JS:** Control de flujo limpio usando `{}` para bloques.
-* **Comentarios Modernos:** Soporta comentarios de una línea `//` y multilínea `/* ... */`.
-* **Tipado Dinámico:** Variables dinámicas para prototipado rápido de videojuegos.
-* **Librería Estándar Integrada (Stdlib):** * `math.gs`: Métodos como `clamp`, `lerp` y `abs`.
-  * `io`: Puentes directos con Python para serializar datos JSON y guardar partidas físicas en disco.
-  * `os/env.gs`: Diagnóstico del sistema y lectura de plataforma.
+## Alcance
 
-
----
-
-## 🚦 Cómo Iniciar
-
-### 1. Clonar el repositorio e instalar dependencias
-Asegúrate de tener un entorno virtual activo de Python.
-
-```bash
-# Activar entorno virtual de Python (.venv)
-python -m venv .venv
-
-# Instalar librerías del motor y del Launcher GUI
-python -m pip install -r requirements.txt
-```
-
-### 2. Abrir el Launcher de Proyectos
-Ejecuta el launcher para crear un nuevo proyecto de videojuego automatizado:
-
-```bash
-python run.py
-```
-
-### 3. Escribir Scripts GOS
-Puedes controlar el comportamiento de cualquier nodo del juego creando un archivo de extensión `.gs`. He aquí un ejemplo:
-
-```javascript
-/* ship_controller.gs
-   Mueve la nave espacial en el eje X
-*/
-
-var speed = 300.0
-
-func update_ship(delta) {
-    if (is_key_pressed("right")) {
-        self.position.x = self.position.x + (speed * delta)
-    }
-    if (is_key_pressed("left")) {
-        self.position.x = self.position.x - (speed * delta)
-    }
-}
-```
+La documentacion intenta describir el estado real del codigo actual. Si una API esta incompleta o todavia es basica, se indica como tal para evitar ambiguedades.
