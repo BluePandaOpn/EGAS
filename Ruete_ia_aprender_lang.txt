@@ -3,7 +3,7 @@
 * `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/requirements.txt`
 * `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/Ruete_ia_aprender_lang.txt`
 * `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/run.py`
-* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/docs/index.txt`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/refs/heads/main/docs/index.txt`
 
 ---
 
