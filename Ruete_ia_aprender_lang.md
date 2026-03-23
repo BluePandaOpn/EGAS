@@ -112,4 +112,4 @@
 
 ---
 
-> 💡 **Nota Importante:** He asumido que tu rama principal de GitHub se llama `main`. Si en tu repositorio usas `master`, simplemente cambia `main` por `master` en las direcciones.
+> 💡 **Nota Importante:** En **GitHub** con todas sus rutas **raw**
