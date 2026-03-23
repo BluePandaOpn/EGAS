@@ -1,0 +1,84 @@
+=========================================================
+      GUÍA DE CREACIÓN DE ESCENAS (.dscn) PARA EGAS
+=========================================================
+
+Este documento describe el formato estándar de archivos de escena (.dscn)
+para el motor EGAS. El formato está inspirado en .tscn de Godot, adaptado 
+al sistema de nodos de EGAS y a los scripts del lenguaje GOS.
+
+Un archivo .dscn es texto plano dividido en tres conceptos:
+  1. Recursos externos ([ext_resource])
+  2. Definición de Nodos ([node])
+  3. Propiedades de los nodos (clave = valor)
+
+---------------------------------------------------------
+1. ESTRUCTURA Y SINTAXIS GENERAL
+---------------------------------------------------------
+
+Regla Básica:
+- Las secciones principales van entre corchetes: [seccion]
+- Los comentarios usan la almohadilla: #
+- Las propiedades van debajo de su respectivo nodo en formato: variable = valor
+
+Ejemplo de sintaxis:
+
+# --- 📦 RECURSOS EXTERNOS ---
+# Se usan para precargar scripts GOS y Texturas pesadas en memoria.
+[ext_resource path="lib/gos/docs/funciones_natibas_del_motor.gs" id="res_logica_nave"]
+[ext_resource path="assets/nave.png" id="res_textura_nave"]
+
+
+# --- 🌳 ÁRBOL DE NODOS ---
+
+# 🔹 Nodo Raíz (No tiene parámetro 'parent')
+[node name="MundoExterior" type="Node"]
+
+# 🔹 Nodo Interfaz (Hijo directo de MundoExterior)
+[node name="CapaUI" type="Control" parent="MundoExterior"]
+
+# 🔹 Nodo Texto (Hijo de CapaUI usando la ruta de herencia jerárquica)
+[node name="LabelPuntos" type="Label" parent="MundoExterior/CapaUI"]
+text = "Puntuación: 0"
+position_x = 20
+position_y = 20
+
+# 🔹 Nodo Físico del Jugador con script GOS adjunto
+[node name="NaveJugador" type="CharacterBody2D" parent="MundoExterior"]
+position_x = 400
+position_y = 300
+script = "res_logica_nave"
+
+# 🔹 Sprite visual de la nave (Hijo de la Nave física)
+[node name="VisualNave" type="Sprite2D" parent="MundoExterior/NaveJugador"]
+texture = "res_textura_nave"
+
+
+---------------------------------------------------------
+2. LÓGICA DE CARGA EN EL MOTOR (egas/scene/parser.py)
+---------------------------------------------------------
+
+Para que la lectura sea sencilla y ligera, el 'parser.py' del motor debe 
+ejecutar secuencialmente estos tres pasos al leer el archivo línea por línea:
+
+PASO 1: Registro de recursos
+  - Al encontrar `[ext_resource path="ruta" id="mi_id"]`, el motor guarda 
+    en un diccionario de python la ruta física: `recursos["mi_id"] = "ruta"`.
+
+PASO 2: Instanciación de Nodos
+  - Al encontrar `[node name="X" type="Y"]`, el motor busca la clase en la 
+    carpeta `thirdparty/nodes/` instanciando el objeto dinámicamente con Python.
+  - Se guarda el nodo en un diccionario temporal de la escena `nodos_vivos["X"] = objeto`.
+
+PASO 3: Jerarquía y Propiedades
+  - Si el parámetro `parent="Padre"` existe, el motor busca al padre en `nodos_vivos`
+    y le aplica el método nativo de EGAS: `padre.add_child(nodo_actual)`.
+  - Las líneas de propiedades (ej: `position_x = 300`) se aplican inmediatamente 
+    sobre el último nodo instanciado usando `setattr(nodo_actual, "position_x", 300)`.
+
+---------------------------------------------------------
+3. VENTAJAS DE ESTA LÓGICA SENSATA
+---------------------------------------------------------
+✅ Lectura secuencial rápida línea a línea sin necesidad de librerías de terceros complejas.
+✅ Al usar strings para apuntar a los IDs de recursos se evita recargar el disco duro.
+✅ Totalmente escalable: Si creas nuevos Nodos2D o Node3D, el formato .dscn los leerá 
+   automáticamente sin modificar el parseador de escenas.
