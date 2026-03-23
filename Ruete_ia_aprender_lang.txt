@@ -1,0 +1,115 @@
+### 📂 Raíz del Proyecto
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/README.md`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/requirements.txt`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/Ruete_ia_aprender_lang.txt`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/run.py`
+
+---
+
+### 📂 Configuración (`config/`)
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/config/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/config/settings.py`
+
+---
+
+### 📂 Motor principal (`egas/`)
+
+#### ⚙️ Core
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/core/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/core/engine.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/core/logger.py`
+
+#### 🔌 Interfaces
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/interfaces/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/interfaces/node.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/interfaces/physics.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/interfaces/render.py`
+
+#### 🌀 Physics
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/physics/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/physics/simulator.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/physics/solver.py`
+
+#### 🖼️ Render
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/render/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/render/server.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/render/texture.py`
+
+#### 🌳 Scene
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/scene/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/scene/parser.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/scene/script.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/egas/scene/tree.py`
+
+---
+
+### 📂 Librerías y Lenguaje propio (`lib/gos/`)
+
+#### 📝 Lexer & Parser
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/lexer/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/lexer/lexer.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/lexer/token.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/parser/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/parser/ast.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/parser/parser.py`
+
+#### ⚙️ Runtime & Objects
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/objects/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/objects/class.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/objects/instance.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/runtime/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/runtime/builtins.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/runtime/environment.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/runtime/interpreter.py`
+
+#### 📚 Stdlib
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/stdlib/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/stdlib/io/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/stdlib/math/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/stdlib/math/math.gs`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/stdlib/os/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/lib/gos/stdlib/os/env.gs`
+
+---
+
+### 📂 Terceros y Nodos (`thirdparty/`)
+
+#### 🛠️ Core Thirdparty
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/input_system.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/math2d.py`
+
+#### 🟢 Nodes (Base y Control)
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/base/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/base/node.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/control/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/control/button.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/control/control.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/control/label.py`
+
+#### 🔵 Node2D (Físicas y Visuales)
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node2d/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node2d/node2d.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node2d/physics/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node2d/physics/character_body_2d.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node2d/physics/rigid_body_2d.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node2d/physics/static_body_2d.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node2d/shapes/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node2d/shapes/collision_polygon_2d.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node2d/shapes/collision_shape_2d.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node2d/visuals/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node2d/visuals/animated_sprite_2d.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node2d/visuals/sprite_2d.py`
+
+#### 🟡 Node3D
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node3d/__init__.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node3d/camera_3d.py`
+* `https://raw.githubusercontent.com/BluePandaOpn/EGAS/main/thirdparty/nodes/node3d/node3d.py`
+
+---
+
+> 💡 **Nota Importante:** He asumido que tu rama principal de GitHub se llama `main`. Si en tu repositorio usas `master`, simplemente cambia `main` por `master` en las direcciones.
