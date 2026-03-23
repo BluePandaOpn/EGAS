@@ -36,6 +36,48 @@ class Interpreter:
         except Exception as e:
             Logger.error("GOS Interpreter", f"Error de ejecución: {e}")
 
+    # --- 🔥 NUEVOS MÉTODOS PARA EL CICLO DE VIDA (Engine / SceneTree) ---
+
+    def call_function(self, func_name: str, args: List[Any] = None) -> Any:
+        """
+        Permite al motor llamar funciones de GOS directamente (ej: _process, _input).
+        Busca la función en el entorno global y la ejecuta.
+        """
+        if args is None:
+            args = []
+
+        try:
+            # Buscamos la función en el entorno
+            # Como Environment no tiene un método directo de 'has' sin lanzar error, lo intentamos capturar
+            try:
+                # Usamos una expresión falsa para buscarlo
+                from lib.gos.lexer.token import Token
+                dummy_token = Token(TokenType.IDENTIFIER, func_name, None, 0)
+                callee = self.globals.get(dummy_token)
+            except RuntimeError:
+                return None # La función no existe en el script (ej: el usuario no programó _input)
+
+            # Si la encontramos y es una declaración de función de GOS
+            if isinstance(callee, FunctionStmt):
+                env_funcion = Environment(self.globals)
+                
+                for i, param in enumerate(callee.params):
+                    if i < len(args):
+                        env_funcion.define(param.lexeme, args[i])
+
+                try:
+                    self._execute_block(callee.body, env_funcion)
+                except ReturnException as r:
+                    return r.value
+                
+                return None
+                
+        except Exception as e:
+            Logger.error("GOS Interpreter", f"Error llamando a la función '{func_name}': {e}")
+        
+        return None
+
+
     # --- 🏗️ EJECUTOR DE SENTENCIAS (Acciones / Statements) ---
 
     def _execute(self, stmt: Stmt):
@@ -102,6 +144,13 @@ class Interpreter:
 
     def _evaluate_binary(self, expr: BinaryExpr) -> Any:
         left = self._evaluate(expr.left)
+        
+        # 🆕 SOPORTE PARA EL OPERADOR 'is' (Comparación de Clases de Eventos)
+        if expr.operator.lexeme == "is":
+            right_class_name = expr.right.name.lexeme if isinstance(expr.right, VariableExpr) else str(self._evaluate(expr.right))
+            if left is None: return False
+            return left.__class__.__name__ == right_class_name
+
         right = self._evaluate(expr.right)
         op = expr.operator.type
 
@@ -151,7 +200,7 @@ class Interpreter:
     def _evaluate_get(self, expr: GetExpr) -> Any:
         obj = self._evaluate(expr.obj)
         
-        # Si es un objeto nativo de Python (como un Nodo de Thirdparty inyectado: self.position.x)
+        # Si es un objeto nativo de Python (como un Nodo o un Evento)
         if hasattr(obj, expr.name.lexeme):
             attr = getattr(obj, expr.name.lexeme)
             return attr
