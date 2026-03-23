@@ -1,47 +1,84 @@
 import pygame
-from thirdparty.nodes.control.control import Control
+from thirdparty.nodes.node2d.node2d import Node2D
+from egas.core.logger import Logger
 
-class Label(Control):
+
+class Label(Node2D):
     """
-    Nodo de UI para pintar texto plano en la pantalla utilizando fuentes del sistema.
+    Nodo Label para el motor EGAS.
+    Permite renderizar texto en pantalla usando las fuentes de Pygame.
     """
-    def __init__(self, name: str = "Label"):
-        super().__init__(name)
-        
-        self.text: str = "Texto de Prueba"
-        self.font_size: int = 24
-        self.font_color = (255, 255, 255) # Blanco
-        self.font_name: str = None # Usará la fuente por defecto del sistema
-        
-        self._cached_surface = None
 
-    def draw(self, render_server):
-        if not self.visible or not self.text:
-            return
+    def __init__(self):
+        super().__init__()
+        self.set_name("Label")
 
-        # Para pintar texto, aprovechamos directamente las capacidades de Pygame
-        # (Aunque en un motor purista esto se delegaría al RenderServer)
-        if not self._cached_surface:
-            font = pygame.font.SysFont(self.font_name, self.font_size)
-            self._cached_surface = font.render(self.text, True, self.font_color)
+        # --- Propiedades de Texto ---
+        self.text = "Hola Mundo"
+        self.font_size = 24
+        self.font_color = (255, 255, 255) # Blanco por defecto
+        self.font_name = None             # None usa la fuente por defecto de Pygame
+
+        # --- Cache del renderizado (Para no saturar la CPU) ---
+        self._font_cache = None
+        self._text_surface = None
+        self._dirty = True # Bandera para saber si el texto cambió y hay que redibujarlo
+
+        Logger.info("Label", "Nodo Label instanciado con éxito.")
+
+    def process(self, delta: float):
+        """Lógica por frame."""
+        super().process(delta)
+
+    def _draw(self, render_server):
+        """
+        Dibuja el texto en la pantalla usando Pygame.
+        Esta función la llamará automáticamente el SceneTree.
+        """
+        # 1. Si el texto o tamaño cambió, regeneramos la superficie en RAM
+        if self._dirty or self._text_surface is None:
+            self._regenerate_surface()
+
+        # 2. Dibujamos en la pantalla si la superficie es válida y tenemos el display de pygame
+        if self._text_surface:
+            # Obtenemos la pantalla principal de Pygame desde tu render_server
+            screen = getattr(render_server, "screen", pygame.display.get_surface())
             
-            # Auto-ajustar el tamaño del control al tamaño del texto renderizado
-            self.size.x = self._cached_surface.get_width()
-            self.size.y = self._cached_surface.get_height()
+            if screen:
+                # Calculamos la posición final sumando la posición global de la UI
+                pos_x = self.position_x
+                pos_y = self.position_y
+                screen.blit(self._text_surface, (pos_x, pos_y))
 
-        # Enviar al render_server
-        # Creamos una ITexture al vuelo para pintarlo
-        from egas.render.texture import PygameTexture
-        txt_texture = PygameTexture(self._cached_surface, f"label_{self.get_name()}")
-        
-        render_server.draw_texture(
-            texture=txt_texture,
-            position=self.get_global_position().to_tuple(),
-            scale=(1.0, 1.0),
-            rotation=0.0
-        )
+    def _regenerate_surface(self):
+        """Genera la imagen de los píxeles de las letras usando Pygame."""
+        try:
+            # Crear o cargar la fuente
+            self._font_cache = pygame.font.SysFont(self.font_name, self.font_size)
+            
+            # Crear la superficie de imagen con el texto
+            self._text_surface = self._font_cache.render(self.text, True, self.font_color)
+            self._dirty = False
+        except Exception as e:
+            Logger.error("Label", f"Error renderizando el texto '{self.text}': {e}")
+
+    # --- 🛠️ Funciones de Control accesibles desde GOS ---
 
     def set_text(self, new_text: str):
-        if self.text != new_text:
-            self.text = new_text
-            self._cached_surface = None # Forzar regeneración del texto
+        """Cambia el texto que se muestra."""
+        if str(new_text) != self.text:
+            self.text = str(new_text)
+            self._dirty = True
+
+    def set_font_size(self, size: int):
+        """Cambia el tamaño de la letra."""
+        if size != self.font_size:
+            self.font_size = size
+            self._dirty = True
+
+    def set_color(self, r: int, g: int, b: int):
+        """Cambia el color del texto (RGB)."""
+        new_color = (r, g, b)
+        if new_color != self.font_color:
+            self.font_color = new_color
+            self._dirty = True

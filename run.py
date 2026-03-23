@@ -17,6 +17,12 @@ from egas.scene.tree import SceneTree
 from thirdparty.nodes.base.node import Node
 from thirdparty.nodes.node2d.node2d import Node2D
 from thirdparty.nodes.node2d.visuals.sprite_2d import Sprite2D
+from thirdparty.nodes.camera_2d import Camera2D
+from thirdparty.nodes.timers.timer import Timer
+from thirdparty.nodes.control.label import Label
+from thirdparty.nodes.node2d.physics.area_2d import Area2D
+from thirdparty.nodes.node2d.visuals.animated_sprite_2d import AnimatedSprite2D
+from thirdparty.nodes.audio_player import AudioPlayer
 
 
 ENGINE_VERSION = "1.0.2"
@@ -493,9 +499,16 @@ class UnifiedRuntime:
         Settings.MAIN_SCENE = config.main_scene
 
     def _register_builtin_nodes(self) -> None:
-        SceneParser.register_node_type("Node", Node)
+        SceneParser.register_node_type("Node", Node)  
         SceneParser.register_node_type("Node2D", Node2D)
         SceneParser.register_node_type("Sprite2D", Sprite2D)
+        SceneParser.register_node_type("Camera2D", Camera2D)
+        SceneParser.register_node_type("Timer", Timer)
+        SceneParser.register_node_type("Label", Label)
+        SceneParser.register_node_type("Area2D", Area2D)
+        SceneParser.register_node_type("AnimatedSprite2D", AnimatedSprite2D)
+        SceneParser.register_node_type("AudioPlayer", AudioPlayer)
+        
 
     def _install_live_reload_hook(self) -> None:
         original_process_logic = self.engine._process_logic

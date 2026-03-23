@@ -1,0 +1,10 @@
+[Main]
+type = Node2D
+
+[Logo]
+type = Sprite2D
+parent = Main
+position_x = 400.0
+position_y = 400.0
+texture = res://assets/placeholder.png
+script = res://scripts/main.gs
