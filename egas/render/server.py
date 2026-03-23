@@ -67,6 +67,28 @@ class PygameRenderServer(IRenderServer):
         # 4. Estampar (Blit) en pantalla
         self.screen.blit(surf, rect)
 
+    def draw_rect(self, rect: Tuple[float, float, float, float], color, width: int = 0, border_radius: int = 0):
+        if not self.is_initialized:
+            return
+        pygame.draw.rect(
+            self.screen,
+            color,
+            pygame.Rect(int(rect[0]), int(rect[1]), int(rect[2]), int(rect[3])),
+            width,
+            border_radius=border_radius,
+        )
+
+    def draw_circle(self, color, center: Tuple[float, float], radius: float, width: int = 0):
+        if not self.is_initialized:
+            return
+        pygame.draw.circle(
+            self.screen,
+            color,
+            (int(center[0]), int(center[1])),
+            max(1, int(radius)),
+            width,
+        )
+
     def end_frame(self):
         """Hace el 'Flip' de los buffers para mostrar el frame al usuario."""
         if not self.is_initialized: return

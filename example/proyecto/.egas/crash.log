@@ -1,0 +1,2 @@
+error=AttributeError
+message='Label' object has no attribute 'position_x'

@@ -1,0 +1,6 @@
+[Jugador]
+type = Sprite2D
+position_x = 100.0
+position_y = 300.0
+texture = res://assets/placeholder.png
+script = res://scripts/jugador.gs

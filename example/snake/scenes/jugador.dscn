@@ -1,0 +1,8 @@
+[Cabeza]
+type = Sprite2D
+position_x = 200.0
+position_y = 200.0
+scale_x = 0.1
+scale_y = 0.1
+texture = res://assets/placeholder.png
+script = res://scripts/snake.gs

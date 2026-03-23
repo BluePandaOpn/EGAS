@@ -12,6 +12,7 @@ from lib.gos.lexer.token import TokenType
 from lib.gos.runtime.environment import Environment
 from lib.gos.runtime.builtins import BUILTINS
 from lib.gos.stdlib import get_stdlib_extensions
+from lib.gos.objects.instance import GosInstance
 
 
 class Interpreter:
@@ -272,23 +273,95 @@ class Interpreter:
 
     def _evaluate_get(self, expr: GetExpr) -> Any:
         obj = self._evaluate(expr.obj)
-        
-        # Si es un objeto nativo de Python (como un Nodo o un Evento)
-        if hasattr(obj, expr.name.lexeme):
-            attr = getattr(obj, expr.name.lexeme)
-            return attr
-            
-        raise RuntimeError(f"Propiedad '{expr.name.lexeme}' no encontrada en el objeto.")
+        return self._get_property(obj, expr.name)
 
     def _evaluate_set(self, expr: SetExpr) -> Any:
-        obj = self._evaluate(expr.obj)
         value = self._evaluate(expr.value)
-
-        if hasattr(obj, expr.name.lexeme):
-            setattr(obj, expr.name.lexeme, value)
+        if isinstance(expr.obj, VariableExpr) and expr.obj.name.lexeme == expr.name.lexeme:
+            self.environment.assign(expr.name, value)
             return value
 
-        raise RuntimeError(f"No se puede asignar la propiedad '{expr.name.lexeme}' al objeto.")
+        obj = self._evaluate(expr.obj)
+        return self._set_property(obj, expr.name, value)
+
+    def _get_property(self, obj: Any, name_token) -> Any:
+        property_name = name_token.lexeme
+
+        if isinstance(obj, GosInstance):
+            return obj.get(name_token)
+
+        alias_value = self._get_python_property_alias(obj, property_name)
+        if alias_value is not _PROPERTY_NOT_FOUND:
+            return alias_value
+
+        if isinstance(obj, dict) and property_name in obj:
+            return obj[property_name]
+
+        if hasattr(obj, property_name):
+            return getattr(obj, property_name)
+
+        raise RuntimeError(f"Propiedad '{property_name}' no encontrada en el objeto.")
+
+    def _set_property(self, obj: Any, name_token, value: Any) -> Any:
+        property_name = name_token.lexeme
+
+        if isinstance(obj, GosInstance):
+            obj.set(name_token, value)
+            return value
+
+        if self._set_python_property_alias(obj, property_name, value):
+            return value
+
+        if isinstance(obj, dict):
+            obj[property_name] = value
+            return value
+
+        if hasattr(obj, property_name):
+            setattr(obj, property_name, value)
+            return value
+
+        try:
+            setattr(obj, property_name, value)
+            return value
+        except (AttributeError, TypeError):
+            raise RuntimeError(f"No se puede asignar la propiedad '{property_name}' al objeto.")
+
+
+    # Compatibilidad entre propiedades estilo escena y nodos Python.
+    def _get_python_property_alias(self, obj: Any, property_name: str) -> Any:
+        if property_name in ("position_x", "position_y") and hasattr(obj, "get_position"):
+            position = obj.get_position()
+            axis = "x" if property_name.endswith("_x") else "y"
+            if hasattr(position, axis):
+                return getattr(position, axis)
+
+        if property_name in ("scale_x", "scale_y") and hasattr(obj, "get_scale"):
+            scale = obj.get_scale()
+            axis = "x" if property_name.endswith("_x") else "y"
+            if hasattr(scale, axis):
+                return getattr(scale, axis)
+
+        return _PROPERTY_NOT_FOUND
+
+    def _set_python_property_alias(self, obj: Any, property_name: str, value: Any) -> bool:
+        if property_name in ("position_x", "position_y") and hasattr(obj, "get_position") and hasattr(obj, "set_position"):
+            position = obj.get_position()
+            x = value if property_name == "position_x" else getattr(position, "x", 0.0)
+            y = value if property_name == "position_y" else getattr(position, "y", 0.0)
+            obj.set_position(x, y)
+            return True
+
+        if property_name in ("scale_x", "scale_y") and hasattr(obj, "get_scale") and hasattr(obj, "set_scale"):
+            scale = obj.get_scale()
+            x = value if property_name == "scale_x" else getattr(scale, "x", 1.0)
+            y = value if property_name == "scale_y" else getattr(scale, "y", 1.0)
+            obj.set_scale(x, y)
+            return True
+
+        return False
+
+
+_PROPERTY_NOT_FOUND = object()
 
 
 # --- 🛑 EXCEPCIÓN DE CONTROL PARA RETURNS ---

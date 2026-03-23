@@ -22,35 +22,6 @@ Este repositorio contiene el núcleo del motor, el transpilador del lenguaje, la
   * `io`: Puentes directos con Python para serializar datos JSON y guardar partidas físicas en disco.
   * `os/env.gs`: Diagnóstico del sistema y lectura de plataforma.
 
----
-
-## 📂 Estructura del Ecosistema de GOS
-
-```text
-lib/gos/
-│
-├── 📂 lexer/        # Analizador Léxico (Genera listado de tokens)
-│   ├── 📜 lexer.py
-│   └── 📜 token.py
-│
-├── 📂 parser/       # Analizador Sintáctico (Genera el árbol AST)
-│   ├── 📜 ast.py
-│   └── 📜 parser.py
-│
-├── 📂 objects/      # Clases de POO internas de GOS (Instancias y Objetos vivos)
-│   ├── 📜 class.py
-│   └── 📜 instance.py
-│
-├── 📂 runtime/      # Entornos de memoria y Ejecución (Intérprete)
-│   ├── 📜 builtins.py
-│   ├── 📜 environment.py
-│   └── 📜 interpreter.py
-│
-└── 📂 stdlib/       # Librería estándar (Matemáticas, IO, Sistemas)
-    ├── 📂 io/
-    ├── 📂 math/
-    └── 📂 os/
-```
 
 ---
 
@@ -64,7 +35,7 @@ Asegúrate de tener un entorno virtual activo de Python.
 python -m venv .venv
 
 # Instalar librerías del motor y del Launcher GUI
-pip install pygame PyQt6
+python -m pip install -r requirements.txt
 ```
 
 ### 2. Abrir el Launcher de Proyectos

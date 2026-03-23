@@ -150,7 +150,7 @@ class Parser:
     def _comparison(self) -> Expr:
         expr = self._term()
 
-        while self._match(TokenType.GREATER, TokenType.GREATER_EQUALS, TokenType.LESS, TokenType.LESS_EQUALS):
+        while self._match(TokenType.GREATER, TokenType.GREATER_EQUALS, TokenType.LESS, TokenType.LESS_EQUALS, TokenType.IS):
             operator = self._previous()
             right = self._term()
             expr = BinaryExpr(expr, operator, right)

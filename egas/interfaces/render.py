@@ -34,6 +34,16 @@ class IRenderServer(ABC):
         pass
 
     @abstractmethod
+    def draw_rect(self, rect: Tuple[float, float, float, float], color, width: int = 0, border_radius: int = 0):
+        """Dibuja un rectangulo solido o solo su borde."""
+        pass
+
+    @abstractmethod
+    def draw_circle(self, color, center: Tuple[float, float], radius: float, width: int = 0):
+        """Dibuja un circulo solido o solo su borde."""
+        pass
+
+    @abstractmethod
     def end_frame(self):
         """Vuelca el buffer de dibujo a la pantalla física."""
         pass

@@ -12,6 +12,7 @@ from typing import Any
 
 from config.settings import Settings
 from egas.core.logger import Logger
+from egas.core.runtime_services import RuntimeServices
 from egas.scene.parser import SceneParser
 from egas.scene.tree import SceneTree
 from thirdparty.nodes.base.node import Node
@@ -20,8 +21,15 @@ from thirdparty.nodes.node2d.visuals.sprite_2d import Sprite2D
 from thirdparty.nodes.camera_2d import Camera2D
 from thirdparty.nodes.timers.timer import Timer
 from thirdparty.nodes.control.label import Label
+from thirdparty.nodes.control.control import Control
+from thirdparty.nodes.control.button import Button
+from thirdparty.nodes.control.canvas_layer import CanvasLayer
+from thirdparty.nodes.control.color_rect import ColorRect
 from thirdparty.nodes.node2d.physics.area_2d import Area2D
+from thirdparty.nodes.node2d.physics.character_body_2d import CharacterBody2D
+from thirdparty.nodes.node2d.shapes.collision_shape_2d import CollisionShape2D
 from thirdparty.nodes.node2d.visuals.animated_sprite_2d import AnimatedSprite2D
+from thirdparty.nodes.node2d.snake_game_2d import SnakeGame2D
 from thirdparty.nodes.audio_player import AudioPlayer
 
 
@@ -372,6 +380,9 @@ class ResourceManager:
         parser = SceneParser()
         return parser.load_scene(scene_path)
 
+    def load_scene_sync(self, scene_path: str):
+        return self._load_scene(scene_path)
+
     def collect_script_paths(self, root_node) -> list[Path]:
         paths: list[Path] = []
 
@@ -455,6 +466,7 @@ class UnifiedRuntime:
         config = self.resource_manager.load_project_config()
         self._apply_settings(config)
         self._register_builtin_nodes()
+        RuntimeServices.configure(self.scene_tree, self.resource_manager)
         self.resource_manager.scan_asset_imports()
 
         os.chdir(self.project_dir)
@@ -504,9 +516,16 @@ class UnifiedRuntime:
         SceneParser.register_node_type("Sprite2D", Sprite2D)
         SceneParser.register_node_type("Camera2D", Camera2D)
         SceneParser.register_node_type("Timer", Timer)
+        SceneParser.register_node_type("Control", Control)
+        SceneParser.register_node_type("Button", Button)
+        SceneParser.register_node_type("CanvasLayer", CanvasLayer)
+        SceneParser.register_node_type("ColorRect", ColorRect)
         SceneParser.register_node_type("Label", Label)
         SceneParser.register_node_type("Area2D", Area2D)
+        SceneParser.register_node_type("CharacterBody2D", CharacterBody2D)
+        SceneParser.register_node_type("CollisionShape2D", CollisionShape2D)
         SceneParser.register_node_type("AnimatedSprite2D", AnimatedSprite2D)
+        SceneParser.register_node_type("SnakeGame2D", SnakeGame2D)
         SceneParser.register_node_type("AudioPlayer", AudioPlayer)
         
 

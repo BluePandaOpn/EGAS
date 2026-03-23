@@ -1,0 +1,21 @@
+[Nivel1]
+type = Node2D
+
+[Titulo]
+type = Label
+parent = Nivel1
+position_x = 440.0
+position_y = 50.0
+text = SUPER EGAS RUNNER
+font_size = 36
+
+# 🚀 En lugar de Instance, usamos Sprite2D directamente con su propio script
+[Jugador]
+instance = res://scenes/jugador.dscn
+parent = Nivel1
+
+[Camara]
+type = Camera2D
+parent = Nivel1
+target_node = Jugador
+active = true

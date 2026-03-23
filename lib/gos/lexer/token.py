@@ -14,6 +14,7 @@ class TokenType(Enum):
     EQUALS = auto()     # =
     EQUALS_EQUALS = auto() # ==
     BANG_EQUALS = auto()   # !=
+    IS = auto()         # is
     LESS = auto()       # <
     LESS_EQUALS = auto() # <=
     GREATER = auto()    # >

@@ -17,6 +17,7 @@ class Lexer:
         "while": TokenType.WHILE,
         "for": TokenType.FOR,
         "return": TokenType.RETURN,
+        "is": TokenType.IS,
         "true": TokenType.TRUE,
         "false": TokenType.FALSE,
         "nil": TokenType.NIL,

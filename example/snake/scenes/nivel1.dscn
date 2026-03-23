@@ -1,0 +1,78 @@
+[NivelSnake]
+type = Node2D
+
+[JuegoSnake]
+type = SnakeGame2D
+parent = NivelSnake
+position_x = 118
+position_y = 142
+score_label_node = LabelPuntos
+apple_label_node = LabelManzana
+status_label_node = LabelEstado
+
+[ColisionCabeza]
+type = CollisionShape2D
+parent = JuegoSnake
+size_x = 28
+size_y = 28
+debug_visible = true
+
+[HUD]
+type = CanvasLayer
+parent = NivelSnake
+
+[PanelSuperior]
+type = ColorRect
+parent = HUD
+position_x = 20
+position_y = 18
+size_x = 980
+size_y = 92
+color = [20, 24, 29]
+border_color = [82, 97, 117]
+border_width = 2
+border_radius = 18
+
+[Titulo]
+type = Label
+parent = HUD
+position_x = 42
+position_y = 34
+text = Snake EGAS
+font_size = 34
+
+[LabelPuntos]
+type = Label
+parent = HUD
+position_x = 320
+position_y = 36
+text = Puntos: 0   Record: 0
+font_size = 24
+
+[LabelManzana]
+type = Label
+parent = HUD
+position_x = 726
+position_y = 36
+text = Manzana: (0, 0)
+font_size = 24
+
+[PanelInferior]
+type = ColorRect
+parent = HUD
+position_x = 20
+position_y = 656
+size_x = 980
+size_y = 44
+color = [20, 24, 29]
+border_color = [82, 97, 117]
+border_width = 2
+border_radius = 14
+
+[LabelEstado]
+type = Label
+parent = HUD
+position_x = 40
+position_y = 666
+text = Pulsa WASD o flechas para empezar.
+font_size = 20

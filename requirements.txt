@@ -1,0 +1,6 @@
+# Import necensiao para el motor EGAS 
+pygame==2.6.1
+PyQt6==6.7.1
+requests==2.32.3
+#Futuras actualizaciones
+#PyOpenGL # para shaders
