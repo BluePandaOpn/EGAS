@@ -1,10 +1,17 @@
+import os
 from typing import List, Any
+
+try:
+    import requests
+except ModuleNotFoundError:
+    requests = None
+from lib.gos.lexer.lexer import Lexer
+from lib.gos.parser.parser import Parser
 from lib.gos.parser.ast import *
 from lib.gos.lexer.token import TokenType
 from lib.gos.runtime.environment import Environment
 from lib.gos.runtime.builtins import BUILTINS
 from lib.gos.stdlib import get_stdlib_extensions
-from egas.core.logger import Logger
 
 
 class Interpreter:
@@ -34,7 +41,7 @@ class Interpreter:
             for stmt in statements:
                 self._execute(stmt)
         except Exception as e:
-            Logger.error("GOS Interpreter", f"Error de ejecución: {e}")
+            print(f"[GOS Interpreter] Error de ejecución: {e}")
 
     # --- 🔥 NUEVOS MÉTODOS PARA EL CICLO DE VIDA (Engine / SceneTree) ---
 
@@ -73,7 +80,7 @@ class Interpreter:
                 return None
                 
         except Exception as e:
-            Logger.error("GOS Interpreter", f"Error llamando a la función '{func_name}': {e}")
+            print(f"[GOS Interpreter] Error llamando a la función '{func_name}': {e}")
         
         return None
 
@@ -95,10 +102,76 @@ class Interpreter:
             self._execute_function(stmt)
         elif isinstance(stmt, ReturnStmt):
             self._execute_return(stmt)
+        elif isinstance(stmt, ImportStmt):
+            self._execute_import(stmt)
 
     def _execute_var(self, stmt: VarStmt):
         value = self._evaluate(stmt.initializer) if stmt.initializer else None
         self.environment.define(stmt.name.lexeme, value)
+    
+    def _execute_import(self, stmt: ImportStmt):
+        """
+        Resuelve la importación de archivos locales (res://) 
+        o remotos (http://, https://) y combina las funciones/variables.
+        """
+        ruta_original = self._evaluate(stmt.path) # Evaluamos el String del path
+        codigo_fuente = ""
+
+        # 🌐 CASO 1: Es una URL de Internet
+        if ruta_original.startswith("http://") or ruta_original.startswith("https://"):
+            if requests is None:
+                print("[GOS Import ERROR] El soporte HTTP requiere instalar 'requests'.")
+                return
+            print(f"[GOS Import INFO] Descargando módulo remoto: {ruta_original}")
+            try:
+                respuesta = requests.get(ruta_original)
+                if respuesta.status_code == 200:
+                    codigo_fuente = respuesta.text
+                else:
+                    print(f"[GOS Import ERROR] Error al descargar URL. Código HTTP: {respuesta.status_code}")
+                    return
+            except Exception as e:
+                print(f"[GOS Import ERROR] Error de red intentando importar: {e}")
+                return
+
+        # 🏠 CASO 2: Es un recurso local del proyecto (res://)
+        elif ruta_original.startswith("res://"):
+            # Traducimos "res://" a la carpeta raíz donde se ejecuta run.py en tu PC
+            ruta_limpia = ruta_original.replace("res://", "")
+            ruta_absoluta = os.path.join(os.getcwd(), ruta_limpia)
+
+            print(f"[GOS Import INFO] Cargando módulo local: {ruta_absoluta}")
+            
+            if not os.path.exists(ruta_absoluta):
+                print(f"[GOS Import ERROR] El archivo local '{ruta_original}' no existe.")
+                return
+
+            try:
+                with open(ruta_absoluta, 'r', encoding='utf-8') as f:
+                    codigo_fuente = f.read()
+            except Exception as e:
+                print(f"[GOS Import ERROR] Error leyendo archivo local: {e}")
+                return
+
+        else:
+            print(f"[GOS Import ERROR] Prefijo de ruta desconocido '{ruta_original}'. Usa res:// o http://")
+            return
+
+        # 🧠 PROCESAMIENTO DEL NUEVO CÓDIGO
+        if codigo_fuente:
+            # 1. Pasamos el texto descargado/leído al Lexer para sacar tokens
+            lexer = Lexer(codigo_fuente)
+            tokens = lexer.tokenize()
+
+            # 2. Pasamos los tokens al Parser para sacar el Árbol Sintáctico (AST)
+            parser = Parser(tokens)
+            sentencias_del_modulo = parser.parse()
+
+            # 3. Ejecutamos el módulo usando el MISMO entorno del intérprete actual para heredar funciones
+            for modulo_stmt in sentencias_del_modulo:
+                self._execute(modulo_stmt)
+                
+            print(f"[GOS Import SUCCESS] ¡Módulo '{ruta_original}' importado y combinado con éxito!")
 
     def _execute_block(self, statements: List[Stmt], new_env: Environment):
         previous_env = self.environment

@@ -1,10 +1,12 @@
-from egas.interfaces.node import ISceneTree, INode
 from egas.core.logger import Logger
+from egas.interfaces.node import INode, ISceneTree
+
 
 class SceneTree(ISceneTree):
     """
-    Gestiona el árbol de nodos activo en el juego y propaga el ciclo de vida.
+    Gestiona el árbol de nodos activo y propaga los callbacks del ciclo de vida.
     """
+
     def __init__(self):
         self.root_node: INode = None
 
@@ -14,35 +16,52 @@ class SceneTree(ISceneTree):
     def set_root(self, root_node: INode):
         self.root_node = root_node
         Logger.info("SceneTree", f"Nuevo nodo raíz establecido: '{root_node.get_name()}'")
-        self._propagate_ready(self.root_node)
-
-    def _propagate_ready(self, node: INode):
-        """Llama al método ready() de un nodo y todos sus hijos recursivamente."""
-        if not node: return
-        node.ready()
-        for child in node.get_children():
-            self._propagate_ready(child)
 
     def update(self, delta_time: float):
-        """Actualiza la lógica de todos los nodos en cada frame."""
-        if self.root_node:
-            self._propagate_process(self.root_node, delta_time)
+        self.propagate_process(delta_time)
 
-    def _propagate_process(self, node: INode, delta: float):
-        if not node: return
-        node.process(delta)
-        for child in node.get_children():
-            self._propagate_process(child, delta)
+    def propagate_ready(self):
+        self._walk(self.root_node, self._call_ready)
+
+    def propagate_input(self, event):
+        self._walk(self.root_node, lambda node: self._call_if_present(node, "_input", event))
+
+    def propagate_physics_process(self, delta: float):
+        self._walk(self.root_node, lambda node: self._call_if_present(node, "_physics_process", delta))
+
+    def propagate_process(self, delta: float):
+        self._walk(self.root_node, lambda node: node.process(delta))
+
+    def propagate_draw(self, render_server):
+        self._walk(self.root_node, lambda node: self._call_if_present(node, "_draw", render_server))
+
+    def propagate_exit_tree(self):
+        self._walk(self.root_node, lambda node: self._call_if_present(node, "_exit_tree"))
 
     def render_nodes(self, render_server):
-        """Recorre el árbol de arriba hacia abajo para dibujar los nodos visuales."""
-        if self.root_node:
-            self._propagate_render(self.root_node, render_server)
+        self._walk(self.root_node, lambda node: self._draw_node(node, render_server))
 
-    def _propagate_render(self, node: INode, render_server):
-        # Si el nodo tiene una función draw(), la ejecutamos (ej: Sprite2D)
-        if hasattr(node, 'draw'):
-            node.draw(render_server)
-        
+    def _walk(self, node: INode, callback):
+        if not node:
+            return
+        callback(node)
         for child in node.get_children():
-            self._propagate_render(child, render_server)
+            self._walk(child, callback)
+
+    def _call_ready(self, node: INode):
+        node.ready()
+        bridge = getattr(node, "script_bridge", None)
+        if bridge:
+            bridge.execute_ready()
+
+    def _call_if_present(self, node: INode, method_name: str, *args):
+        if hasattr(node, method_name):
+            getattr(node, method_name)(*args)
+
+        bridge = getattr(node, "script_bridge", None)
+        if bridge:
+            bridge.call(method_name, *args)
+
+    def _draw_node(self, node: INode, render_server):
+        if hasattr(node, "draw"):
+            node.draw(render_server)

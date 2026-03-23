@@ -104,3 +104,8 @@ class ReturnStmt(Stmt):
     def __init__(self, keyword: Token, value: Optional[Expr]):
         self.keyword = keyword
         self.value = value
+
+class ImportStmt(Stmt):
+    """Importación de un módulo: import "res://player.gs" """
+    def __init__(self, path: Expr):
+        self.path = path

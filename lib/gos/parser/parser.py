@@ -1,7 +1,6 @@
 from typing import List
 from lib.gos.lexer.token import Token, TokenType
 from lib.gos.parser.ast import *
-from egas.core.logger import Logger
 
 class Parser:
     """
@@ -27,13 +26,18 @@ class Parser:
 
     def _declaration(self) -> Optional[Stmt]:
         try:
+            if self._match(TokenType.IMPORT): return self._import_declaration()
             if self._match(TokenType.FUNC): return self._function_declaration()
             if self._match(TokenType.VAR): return self._var_declaration()
             return self._statement()
         except Exception as e:
             self._synchronize()
-            Logger.error("GOS Parser", f"Error de sintaxis: {e}")
+            print(f"[GOS Parser] Error de sintaxis: {e}")
             return None
+
+    def _import_declaration(self) -> Stmt:
+        path_expr = self._expression()
+        return ImportStmt(path_expr)
 
     def _function_declaration(self) -> Stmt:
         name = self._consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la función.")
@@ -129,7 +133,7 @@ class Parser:
             elif isinstance(expr, GetExpr):
                 return SetExpr(expr.obj, expr.name, value)
 
-            Logger.error("GOS Parser", f"Objetivo de asignación inválido en línea {equals.line}")
+            print(f"[GOS Parser] Objetivo de asignación inválido en línea {equals.line}")
 
         return expr
 
