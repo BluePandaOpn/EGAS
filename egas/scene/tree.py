@@ -1,11 +1,10 @@
+from config.settings import Settings
 from egas.core.logger import Logger
 from egas.interfaces.node import INode, ISceneTree
 
 
 class SceneTree(ISceneTree):
-    """
-    Gestiona el arbol de nodos activo y propaga los callbacks del ciclo de vida.
-    """
+    """Gestiona el arbol activo y propaga callbacks."""
 
     def __init__(self):
         self.root_node: INode = None
@@ -27,20 +26,13 @@ class SceneTree(ISceneTree):
 
         parts = normalized.split("/")
         current = self.root_node
-
         if parts[0] == current.get_name():
             parts = parts[1:]
 
         for part in parts:
-            next_node = None
-            for child in current.get_children():
-                if child.get_name() == part:
-                    next_node = child
-                    break
-            if next_node is None:
+            current = next((child for child in current.get_children() if child.get_name() == part), None)
+            if current is None:
                 return None
-            current = next_node
-
         return current
 
     def update(self, delta_time: float):
@@ -51,12 +43,15 @@ class SceneTree(ISceneTree):
 
     def propagate_input(self, event):
         self._walk(self.root_node, lambda node: self._call_if_present(node, "_input", event))
+        self._cleanup_queued_nodes()
 
     def propagate_physics_process(self, delta: float):
         self._walk(self.root_node, lambda node: self._call_if_present(node, "_physics_process", delta))
+        self._cleanup_queued_nodes()
 
     def propagate_process(self, delta: float):
         self._walk(self.root_node, lambda node: node.process(delta))
+        self._cleanup_queued_nodes()
 
     def propagate_draw(self, render_server):
         self._render_walk(self.root_node, render_server, draw_custom=False)
@@ -79,34 +74,27 @@ class SceneTree(ISceneTree):
 
     def _sorted_children(self, node: INode):
         children = list(node.get_children())
-        return sorted(
-            enumerate(children),
-            key=lambda item: (
-                getattr(item[1], "z_index", 0),
-                item[0],
-            ),
-        )
+        return sorted(enumerate(children), key=lambda item: (getattr(item[1], "z_index", 0), item[0]))
 
     def _render_walk(self, node: INode, render_server, draw_script: bool = True, draw_custom: bool = True):
         if not node:
             return
-
         if draw_script:
             self._call_if_present(node, "_draw", render_server)
-
         if draw_custom:
             self._draw_node(node, render_server)
-
         for _, child in self._sorted_children(node):
             self._render_walk(child, render_server, draw_script=draw_script, draw_custom=draw_custom)
 
     def _call_ready(self, node: INode):
+        self._debug_node(node, "_ready")
         node.ready()
         bridge = getattr(node, "script_bridge", None)
         if bridge:
             bridge.execute_ready()
 
     def _call_if_present(self, node: INode, method_name: str, *args):
+        self._debug_node(node, method_name)
         if hasattr(node, method_name):
             getattr(node, method_name)(*args)
 
@@ -117,3 +105,23 @@ class SceneTree(ISceneTree):
     def _draw_node(self, node: INode, render_server):
         if hasattr(node, "draw"):
             node.draw(render_server)
+
+    def _cleanup_queued_nodes(self):
+        if self.root_node is None:
+            return
+        if getattr(self.root_node, "is_queued_for_free", lambda: False)():
+            self.root_node = None
+            return
+        self._cleanup_subtree(self.root_node)
+
+    def _cleanup_subtree(self, node: INode):
+        for child in list(node.get_children()):
+            if getattr(child, "is_queued_for_free", lambda: False)():
+                node.remove_child(child)
+                continue
+            self._cleanup_subtree(child)
+
+    @staticmethod
+    def _debug_node(node: INode, method_name: str):
+        if Settings.DEBUG_LIFECYCLE:
+            Logger.debug("Lifecycle", f"{node.get_name()}.{method_name}")

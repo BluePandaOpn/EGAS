@@ -11,9 +11,11 @@ class TokenType(Enum):
     MINUS = auto()      # -
     STAR = auto()       # *
     SLASH = auto()      # /
+    PIPE = auto()       # |
     EQUALS = auto()     # =
     EQUALS_EQUALS = auto() # ==
     BANG_EQUALS = auto()   # !=
+    BANG = auto()       # !
     IS = auto()         # is
     LESS = auto()       # <
     LESS_EQUALS = auto() # <=
@@ -28,15 +30,22 @@ class TokenType(Enum):
     COMMA = auto()      # ,
     DOT = auto()        # .
     COLON = auto()      # :
+    LBRACKET = auto()   # [
+    RBRACKET = auto()   # ]
 
     # --- Palabras Clave Reservadas de GOS ---
     VAR = auto()        # var
+    CONST = auto()      # const
     FUNC = auto()       # func
     IF = auto()         # if
+    ELIF = auto()       # elif
     ELSE = auto()       # else
     WHILE = auto()      # while
     FOR = auto()        # for
     RETURN = auto()     # return
+    AND = auto()        # and
+    OR = auto()         # or
+    NOT = auto()        # not
     TRUE = auto()       # true
     FALSE = auto()      # false
     NIL = auto()        # nil (vacío)

@@ -1,21 +1,25 @@
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
+
 from lib.gos.lexer.token import Token
+from lib.gos.runtime.errors import GOSRuntimeError
+
 
 class Environment:
-    """
-    Gestiona la tabla de símbolos (variables y funciones) de GOS en tiempo de ejecución.
-    Soporta ámbitos anidados (Scopes lógicos por bloques).
-    """
-    def __init__(self, enclosing: Optional['Environment'] = None):
-        self.values: Dict[str, Any] = {}
-        self.enclosing = enclosing # El entorno padre (ej: el global para un if local)
+    """Tabla de simbolos de GOS con soporte para constantes."""
 
-    def define(self, name: str, value: Any):
-        """Crea o sobreescribe una variable en el ámbito actual."""
+    def __init__(self, enclosing: Optional["Environment"] = None):
+        self.values: Dict[str, Any] = {}
+        self.constants: set[str] = set()
+        self.enclosing = enclosing
+
+    def define(self, name: str, value: Any, is_const: bool = False):
         self.values[name] = value
+        if is_const:
+            self.constants.add(name)
+        else:
+            self.constants.discard(name)
 
     def get(self, name_token: Token) -> Any:
-        """Busca una variable en este entorno. Si no la halla, busca en el padre."""
         name = name_token.lexeme
         if name in self.values:
             return self.values[name]
@@ -23,12 +27,13 @@ class Environment:
         if self.enclosing is not None:
             return self.enclosing.get(name_token)
 
-        raise RuntimeError(f"Variable '{name}' no definida en la línea {name_token.line}.")
+        raise GOSRuntimeError(f"Variable '{name}' no definida.", line=name_token.line)
 
     def assign(self, name_token: Token, value: Any):
-        """Actualiza el valor de una variable existente (no la crea)."""
         name = name_token.lexeme
         if name in self.values:
+            if name in self.constants:
+                raise GOSRuntimeError(f"No se puede reasignar la constante '{name}'.", line=name_token.line)
             self.values[name] = value
             return
 
@@ -36,4 +41,4 @@ class Environment:
             self.enclosing.assign(name_token, value)
             return
 
-        raise RuntimeError(f"No se puede asignar a una variable no definida '{name}' en la línea {name_token.line}.")
+        raise GOSRuntimeError(f"No se puede asignar a la variable no definida '{name}'.", line=name_token.line)

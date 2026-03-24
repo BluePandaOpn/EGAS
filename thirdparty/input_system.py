@@ -1,5 +1,6 @@
-import pygame
 from typing import List
+
+import pygame
 
 from config.settings import Settings
 from egas.core.logger import Logger
@@ -7,22 +8,17 @@ from thirdparty.math2d import Vector2
 
 
 class InputEvent:
-    """Clase base para todos los eventos del motor EGAS."""
-
     pass
 
 
 class InputEventKey(InputEvent):
-    """Evento de teclado."""
-
     def __init__(self, key_name: str, pressed: bool):
         self.key_name = key_name
         self.pressed = pressed
+        self.action_names = InputSystem.get_actions_for_key(key_name)
 
 
 class InputEventMouseButton(InputEvent):
-    """Evento de boton del raton."""
-
     def __init__(self, button_index: int, pos_x: float, pos_y: float, pressed: bool):
         self.button_index = button_index
         self.position_x = pos_x
@@ -31,8 +27,6 @@ class InputEventMouseButton(InputEvent):
 
 
 class InputEventMouseMotion(InputEvent):
-    """Evento de movimiento del cursor."""
-
     def __init__(self, pos_x: float, pos_y: float, rel_x: float, rel_y: float):
         self.position_x = pos_x
         self.position_y = pos_y
@@ -41,22 +35,17 @@ class InputEventMouseMotion(InputEvent):
 
 
 class InputEventWindowClose(InputEvent):
-    """Evento emitido cuando el usuario solicita cerrar la ventana."""
-
     pass
 
 
 class InputSystem:
-    """
-    Gestor de entrada de teclado y raton.
-    """
-
     _pressed_keys = set()
     _just_pressed_keys = set()
     _just_released_keys = set()
     _pressed_mouse_buttons = set()
     _just_pressed_mouse_buttons = set()
     _just_released_mouse_buttons = set()
+    _last_frame_events: List[InputEvent] = []
 
     @classmethod
     def update(cls) -> List[InputEvent]:
@@ -65,76 +54,77 @@ class InputSystem:
         cls._just_pressed_mouse_buttons.clear()
         cls._just_released_mouse_buttons.clear()
 
-        eventos_despachados: List[InputEvent] = []
+        dispatched_events: List[InputEvent] = []
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
-                key_name = pygame.key.name(event.key)
+                key_name = cls.normalize_key_name(pygame.key.name(event.key))
                 cls._pressed_keys.add(key_name)
                 cls._just_pressed_keys.add(key_name)
-                eventos_despachados.append(InputEventKey(key_name, pressed=True))
-
+                dispatched_events.append(InputEventKey(key_name, pressed=True))
             elif event.type == pygame.KEYUP:
-                key_name = pygame.key.name(event.key)
+                key_name = cls.normalize_key_name(pygame.key.name(event.key))
                 cls._pressed_keys.discard(key_name)
                 cls._just_released_keys.add(key_name)
-                eventos_despachados.append(InputEventKey(key_name, pressed=False))
-
+                dispatched_events.append(InputEventKey(key_name, pressed=False))
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 mx, my = event.pos
                 cls._pressed_mouse_buttons.add(event.button)
                 cls._just_pressed_mouse_buttons.add(event.button)
-                eventos_despachados.append(
-                    InputEventMouseButton(event.button, mx, my, pressed=True)
-                )
-
+                dispatched_events.append(InputEventMouseButton(event.button, mx, my, pressed=True))
             elif event.type == pygame.MOUSEBUTTONUP:
                 mx, my = event.pos
                 cls._pressed_mouse_buttons.discard(event.button)
                 cls._just_released_mouse_buttons.add(event.button)
-                eventos_despachados.append(
-                    InputEventMouseButton(event.button, mx, my, pressed=False)
-                )
-
+                dispatched_events.append(InputEventMouseButton(event.button, mx, my, pressed=False))
             elif event.type == pygame.MOUSEMOTION:
                 mx, my = event.pos
                 rx, ry = event.rel
-                eventos_despachados.append(InputEventMouseMotion(mx, my, rx, ry))
-
+                dispatched_events.append(InputEventMouseMotion(mx, my, rx, ry))
             elif event.type == pygame.QUIT:
-                Logger.system(
-                    "Evento de cierre de ventana detectado. Se iniciara el apagado del motor."
-                )
-                eventos_despachados.append(InputEventWindowClose())
+                Logger.system("Evento de cierre de ventana detectado.")
+                dispatched_events.append(InputEventWindowClose())
 
-        return eventos_despachados
+        cls._last_frame_events = dispatched_events
+        if Settings.DEBUG_INPUT:
+            cls._trace_events(dispatched_events)
+        return dispatched_events
+
+    @classmethod
+    def normalize_key_name(cls, key_name: str) -> str:
+        return Settings.normalize_key_name(key_name)
+
+    @classmethod
+    def get_actions_for_key(cls, key_name: str) -> List[str]:
+        normalized = cls.normalize_key_name(key_name)
+        return [action for action, keys in Settings.INPUT_MAP.items() if normalized in keys]
 
     @classmethod
     def is_key_pressed(cls, key_name: str) -> bool:
-        return key_name in cls._pressed_keys
+        return cls.normalize_key_name(key_name) in cls._pressed_keys
 
     @classmethod
     def is_key_just_pressed(cls, key_name: str) -> bool:
-        return key_name in cls._just_pressed_keys
+        return cls.normalize_key_name(key_name) in cls._just_pressed_keys
 
     @classmethod
     def is_key_just_released(cls, key_name: str) -> bool:
-        return key_name in cls._just_released_keys
+        return cls.normalize_key_name(key_name) in cls._just_released_keys
 
     @classmethod
     def is_action_pressed(cls, action_name: str) -> bool:
         keys = Settings.INPUT_MAP.get(action_name, [])
-        return any(key in cls._pressed_keys for key in keys)
+        return any(cls.normalize_key_name(key) in cls._pressed_keys for key in keys)
 
     @classmethod
     def is_action_just_pressed(cls, action_name: str) -> bool:
         keys = Settings.INPUT_MAP.get(action_name, [])
-        return any(key in cls._just_pressed_keys for key in keys)
+        return any(cls.normalize_key_name(key) in cls._just_pressed_keys for key in keys)
 
     @classmethod
     def is_action_just_released(cls, action_name: str) -> bool:
         keys = Settings.INPUT_MAP.get(action_name, [])
-        return any(key in cls._just_released_keys for key in keys)
+        return any(cls.normalize_key_name(key) in cls._just_released_keys for key in keys)
 
     @classmethod
     def is_mouse_button_pressed(cls, button_index: int) -> bool:
@@ -152,3 +142,27 @@ class InputSystem:
     def get_mouse_pos(cls) -> Vector2:
         mx, my = pygame.mouse.get_pos()
         return Vector2(mx, my)
+
+    @classmethod
+    def get_last_frame_events(cls) -> List[InputEvent]:
+        return list(cls._last_frame_events)
+
+    @classmethod
+    def _trace_events(cls, events: List[InputEvent]):
+        if not events:
+            return
+        descriptions = []
+        for event in events:
+            if isinstance(event, InputEventKey):
+                descriptions.append(
+                    f"key={event.key_name} pressed={event.pressed} actions={','.join(event.action_names) or '-'}"
+                )
+            elif isinstance(event, InputEventMouseButton):
+                descriptions.append(
+                    f"mouse_button={event.button_index} pressed={event.pressed} pos=({event.position_x},{event.position_y})"
+                )
+            elif isinstance(event, InputEventMouseMotion):
+                descriptions.append(f"mouse_motion=({event.position_x},{event.position_y}) rel=({event.relative_x},{event.relative_y})")
+            elif isinstance(event, InputEventWindowClose):
+                descriptions.append("window_close")
+        Logger.debug("Input", " | ".join(descriptions))

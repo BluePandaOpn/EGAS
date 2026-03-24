@@ -2,65 +2,77 @@
 
 ## Formato actual
 
-Las escenas usan un formato de secciones tipo INI:
+Las escenas usan un formato tipo INI:
 
 ```ini
 [Nivel]
-type = Node2D
+type = "Node2D"
 
 [Jugador]
-type = Sprite2D
-parent = Nivel
+type = "Sprite2D"
+parent = "Nivel"
 position_x = 200
 position_y = 120
-texture = res://assets/player.png
-script = res://scripts/player.gs
+texture = "res://assets/player.png"
+script = "res://scripts/player.gs"
 ```
+
+## Tipos de valor
+
+- numeros: `10`, `3.5`
+- booleanos: `true`, `false`
+- listas: `[1, 2, 3]`
+- strings: `"texto"`
+- referencias a nodo: `hud_label_node = "HUD/LabelPuntos"`
+
+El parser todavia acepta strings sin comillas por compatibilidad, pero ahora muestra warning. La recomendacion es usar comillas siempre.
 
 ## Claves soportadas
 
-- `type`: clase del nodo registrada en el runtime
-- `parent`: nombre del padre o ruta jerarquica
-- `instance`: instancia otra escena
-- `script`: script GOS asociado
+- `type`
+- `parent`
+- `instance`
+- `script`
 - `position_x`, `position_y`
 - `scale_x`, `scale_y`
 - `rotation`
 - `size_x`, `size_y`
-- cualquier otra propiedad publica del nodo
+- otras propiedades publicas del nodo
 
-## Referencias a otros nodos
+## Validacion
 
-Si una propiedad termina en `_node`, el parser intenta resolverla como referencia a otro nodo de la escena.
+El parser intenta advertir:
 
-Ejemplo:
+- tipo de nodo desconocido
+- referencia `_node` no resuelta
+- listas invalidas
+- propiedades desconocidas
+- strings sin comillas
+
+Los warnings incluyen seccion, clave y linea aproximada cuando es posible.
+
+## Referencias a nodos
+
+Si una propiedad termina en `_node`, el parser intenta resolverla antes de `_ready()`.
 
 ```ini
 [Juego]
-type = SnakeGame2D
-score_label_node = LabelPuntos
+type = "SnakeGame2D"
+score_label_node = "UI/LabelPuntos"
 ```
 
 ## Jerarquia
 
-Ahora `parent` puede usarse con rutas:
+`parent` puede usarse con rutas:
 
 ```ini
-parent = Root/UI/HUD
+parent = "Root/UI/HUD"
 ```
 
 ## Instanciacion de subescenas
 
 ```ini
 [Jugador]
-instance = res://scenes/jugador.dscn
-parent = Nivel
+instance = "res://scenes/jugador.dscn"
+parent = "Nivel"
 ```
-
-## Buenas practicas
-
-- usa un nodo raiz claro por escena
-- separa mundo y UI con `CanvasLayer`
-- deja scripts en `scripts/`
-- deja assets en `assets/`
-- usa nombres de nodo estables si vas a referenciarlos desde `_node`

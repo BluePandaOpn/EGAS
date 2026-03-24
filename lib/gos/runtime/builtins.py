@@ -1,4 +1,5 @@
 import builtins as py_builtins
+import copy
 import math
 import random
 
@@ -8,25 +9,14 @@ from thirdparty.input_system import InputSystem
 
 
 class BuiltInFunctions:
-    """
-    Coleccion de funciones globales expuestas al runtime de GOS.
-    """
-
     @staticmethod
     def print_gos(*args):
-        """
-        `print()` mantiene un comportamiento simple y directo.
-        """
         py_builtins.print(*args)
         return None
 
     @staticmethod
     def print_console(*args):
-        """
-        `printc()` envia mensajes formateados a la consola del motor.
-        """
-        message = " ".join(str(arg) for arg in args)
-        Logger.info("GOS Console", message)
+        Logger.info("GOS Console", " ".join(str(arg) for arg in args))
         return None
 
     @staticmethod
@@ -101,6 +91,85 @@ class BuiltInFunctions:
     def get_node(node_path):
         return RuntimeServices.get_node(str(node_path))
 
+    @staticmethod
+    def len_value(value):
+        return len(value)
+
+    @staticmethod
+    def str_value(value):
+        return str(value)
+
+    @staticmethod
+    def lower(value):
+        return str(value).lower()
+
+    @staticmethod
+    def upper(value):
+        return str(value).upper()
+
+    @staticmethod
+    def trim(value):
+        return str(value).strip()
+
+    @staticmethod
+    def replace(value, old, new):
+        return str(value).replace(str(old), str(new))
+
+    @staticmethod
+    def clamp(value, min_value, max_value):
+        return max(min_value, min(value, max_value))
+
+    @staticmethod
+    def round_value(value):
+        return round(value)
+
+    @staticmethod
+    def floor_value(value):
+        return math.floor(value)
+
+    @staticmethod
+    def ceil_value(value):
+        return math.ceil(value)
+
+    @staticmethod
+    def abs_value(value):
+        return abs(value)
+
+    @staticmethod
+    def min_value(*values):
+        return min(values)
+
+    @staticmethod
+    def max_value(*values):
+        return max(values)
+
+    @staticmethod
+    def append_value(collection, value):
+        collection.append(value)
+        return collection
+
+    @staticmethod
+    def pop_value(collection, index=None):
+        if index is None:
+            return collection.pop()
+        return collection.pop(int(index))
+
+    @staticmethod
+    def keys_value(mapping):
+        return list(mapping.keys())
+
+    @staticmethod
+    def values_value(mapping):
+        return list(mapping.values())
+
+    @staticmethod
+    def has_key(mapping, key):
+        return key in mapping
+
+    @staticmethod
+    def duplicate(value):
+        return copy.deepcopy(value)
+
 
 BUILTINS = {
     "print": BuiltInFunctions.print_gos,
@@ -123,4 +192,23 @@ BUILTINS = {
     "change_scene": BuiltInFunctions.change_scene,
     "get_root": BuiltInFunctions.get_root,
     "get_node": BuiltInFunctions.get_node,
+    "len": BuiltInFunctions.len_value,
+    "str": BuiltInFunctions.str_value,
+    "lower": BuiltInFunctions.lower,
+    "upper": BuiltInFunctions.upper,
+    "trim": BuiltInFunctions.trim,
+    "replace": BuiltInFunctions.replace,
+    "clamp": BuiltInFunctions.clamp,
+    "round": BuiltInFunctions.round_value,
+    "floor": BuiltInFunctions.floor_value,
+    "ceil": BuiltInFunctions.ceil_value,
+    "abs": BuiltInFunctions.abs_value,
+    "min": BuiltInFunctions.min_value,
+    "max": BuiltInFunctions.max_value,
+    "append": BuiltInFunctions.append_value,
+    "pop": BuiltInFunctions.pop_value,
+    "keys": BuiltInFunctions.keys_value,
+    "values": BuiltInFunctions.values_value,
+    "has_key": BuiltInFunctions.has_key,
+    "duplicate": BuiltInFunctions.duplicate,
 }

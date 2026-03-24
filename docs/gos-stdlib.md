@@ -2,8 +2,6 @@
 
 ## Builtins del motor
 
-Estas funciones se cargan desde [`lib/gos/runtime/builtins.py`](../lib/gos/runtime/builtins.py):
-
 - `print(...)`
 - `printc(...)`
 - `sin(grados)`
@@ -25,30 +23,30 @@ Estas funciones se cargan desde [`lib/gos/runtime/builtins.py`](../lib/gos/runti
 - `get_root()`
 - `get_node(path)`
 
-## Libreria estandar incluida
+## Utilidades nuevas
 
-Codigo en:
+- `len(valor)`
+- `str(valor)`
+- `lower(texto)`
+- `upper(texto)`
+- `trim(texto)`
+- `replace(texto, viejo, nuevo)`
+- `clamp(valor, min, max)`
+- `round(valor)`
+- `floor(valor)`
+- `ceil(valor)`
+- `abs(valor)`
+- `min(...)`
+- `max(...)`
+- `append(lista, valor)`
+- `pop(lista, indice?)`
+- `keys(diccionario)`
+- `values(diccionario)`
+- `has_key(diccionario, clave)`
+- `duplicate(valor)`
 
-- [`lib/gos/stdlib/math/`](../lib/gos/stdlib/math)
-- [`lib/gos/stdlib/io/`](../lib/gos/stdlib/io)
-- [`lib/gos/stdlib/os/`](../lib/gos/stdlib/os)
+## Recomendacion de uso
 
-## Material de apoyo ya incluido
-
-El proyecto ya trae documentos `.gs` de ayuda en:
-
-- [`lib/gos/docs/bucles.gs`](../lib/gos/docs/bucles.gs)
-- [`lib/gos/docs/declarar_variables.gs`](../lib/gos/docs/declarar_variables.gs)
-- [`lib/gos/docs/estructura_de_condicionales.gs`](../lib/gos/docs/estructura_de_condicionales.gs)
-- [`lib/gos/docs/funciones_natibas_del_motor.gs`](../lib/gos/docs/funciones_natibas_del_motor.gs)
-- [`lib/gos/docs/funciones_y_retornos.gs`](../lib/gos/docs/funciones_y_retornos.gs)
-
-## Recomendacion
-
-Para aprender GOS en orden:
-
-1. `declarar_variables.gs`
-2. `estructura_de_condicionales.gs`
-3. `bucles.gs`
-4. `funciones_y_retornos.gs`
-5. `funciones_natibas_del_motor.gs`
+- usa `action_*` para gameplay
+- usa `str(...)` cuando quieras componer texto sin depender de conversion implicita
+- usa listas y diccionarios para estado de UI, inventarios y tablas simples

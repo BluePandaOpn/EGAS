@@ -1,30 +1,24 @@
 from typing import List, Optional
+
 from egas.interfaces.node import INode
-from egas.core.logger import Logger
 
 
 class Node(INode):
-    """
-    Representación base de todos los objetos que viven en el árbol de escenas del motor EGAS.
-    Maneja la jerarquía estructural (Padres e Hijos) y el ciclo de vida básico.
-    """
+    """Nodo base del arbol de escenas."""
 
     def __init__(self, name: str = "Node"):
         self._name: str = name
         self._parent: Optional[INode] = None
         self._children: List[INode] = []
-        
-        # Puente opcional para ejecutar scripts de tu lenguaje GOS
-        self.script_bridge = None 
+        self.script_bridge = None
+        self._queued_for_free = False
 
-    # --- Gestión de Nombres ---
     def get_name(self) -> str:
         return self._name
 
     def set_name(self, name: str):
         self._name = name
 
-    # --- Gestión de Jerarquías (Árbol) ---
     def get_parent(self) -> Optional[INode]:
         return self._parent
 
@@ -32,15 +26,11 @@ class Node(INode):
         self._parent = parent
 
     def add_child(self, child: INode):
-        """Añade un nodo hijo y le asigna este nodo como su padre."""
         if child not in self._children:
             child.set_parent(self)
             self._children.append(child)
-            # Si el juego ya está corriendo, disparamos su evento ready
-            # (En el SceneParser se hace de golpe al cargar, pero esto sirve para spawnear dinámicamente)
 
     def remove_child(self, child: INode):
-        """Remueve un nodo hijo y lo desvincula de este padre."""
         if child in self._children:
             child.set_parent(None)
             self._children.remove(child)
@@ -49,50 +39,54 @@ class Node(INode):
         return self._children
 
     def get_node(self, path: str) -> Optional[INode]:
-        """
-        Busca un nodo hijo por su nombre o ruta relativa (ej: "Nave/Escudo").
-        Muy útil para que los scripts GOS busquen otros nodos.
-        """
         if not path:
             return None
 
         parts = path.split("/")
-        current_search = self
-
+        current = self
         for part in parts:
-            found = False
-            for child in current_search.get_children():
-                if child.get_name() == part:
-                    current_search = child
-                    found = True
-                    break
-            if not found:
+            match = next((child for child in current.get_children() if child.get_name() == part), None)
+            if match is None:
                 return None
+            current = match
+        return current
 
-        return current_search
+    def has_node(self, path: str) -> bool:
+        return self.get_node(path) is not None
 
-    # --- Ciclo de Vida (Sobrescribir en herederos) ---
+    def find_child(self, name: str):
+        for child in self._children:
+            if child.get_name() == name:
+                return child
+            nested = getattr(child, "find_child", lambda _name: None)(name)
+            if nested is not None:
+                return nested
+        return None
+
+    def queue_free(self):
+        self._queued_for_free = True
+
+    def is_queued_for_free(self) -> bool:
+        return self._queued_for_free
+
+    def duplicate(self):
+        import copy
+
+        clone = copy.deepcopy(self)
+        clone._parent = None
+        clone.script_bridge = None
+        clone._queued_for_free = False
+        return clone
+
     def ready(self):
-        """
-        Se ejecuta una única vez cuando el nodo entra al árbol activo.
-        Ideal para inicializar variables.
-        """
         pass
 
     def process(self, delta: float):
-        """
-        Se ejecuta frame por frame. 
-        Llama al puente del lenguaje GOS si este nodo tiene un script adjunto.
-        """
-        # 1. Ejecutar la lógica de GOS escrita por el usuario
         if self.script_bridge:
-            self.script_bridge.execute_tick(delta)
-
-        # 2. (Opcional) Lógica escrita directamente en Python para este nodo
+            self.script_bridge.call("_process", delta)
         self._custom_process(delta)
 
     def _custom_process(self, delta: float):
-        """Sobrescribir en clases hijas si se quiere lógica en Python puro."""
         pass
 
     def __str__(self) -> str:

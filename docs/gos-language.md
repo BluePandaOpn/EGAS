@@ -6,21 +6,22 @@ GOS es el lenguaje de scripting del motor. Se usa para controlar nodos, responde
 
 ## Sintaxis base
 
-GOS usa una sintaxis inspirada en C o JavaScript:
-
 ```javascript
-var speed = 240.0
+const speed = 240.0
 
 func _process(delta) {
-    self.position_x = self.position_x + (speed * delta)
+    if (action_pressed("move_right")) {
+        self.position_x = self.position_x + (speed * delta)
+    }
 }
 ```
 
 ## Elementos soportados
 
 - `var`
+- `const`
 - `func`
-- `if / else`
+- `if / elif / else`
 - `while`
 - `return`
 - llamadas a funciones
@@ -28,6 +29,8 @@ func _process(delta) {
 - asignacion a propiedades
 - operadores `+ - * /`
 - comparaciones `> >= < <= == !=`
+- operadores `and`, `or`, `not`
+- operador `|`
 - operador `is`
 
 ## Literales
@@ -37,10 +40,10 @@ func _process(delta) {
 - `true`
 - `false`
 - `nil`
+- listas: `[1, 2, 3]`
+- diccionarios: `{ "hp": 10, "name": "slime" }`
 
 ## Ciclo de vida soportado
-
-Un script puede definir estas funciones si el nodo las necesita:
 
 - `_ready()`
 - `_input(event)`
@@ -49,28 +52,36 @@ Un script puede definir estas funciones si el nodo las necesita:
 - `_draw(render_server)`
 - `_exit_tree()`
 
+## Input recomendado
+
+Usa acciones configurables antes que teclas crudas:
+
+- `action_pressed("move_up")`
+- `action_just_pressed("ui_accept")`
+- `action_just_released("ui_cancel")`
+
+En `_input(event)`, los eventos de teclado incluyen:
+
+- `event.key_name`
+- `event.pressed`
+- `event.action_names`
+
+`enter` y `return` se normalizan al mismo nombre canonico: `enter`.
+
 ## Acceso al nodo actual
 
 El runtime inyecta `self` para referirse al nodo dueño del script.
 
-Ejemplo:
+## Cambio de escena
 
-```javascript
-func _ready() {
-    self.position_x = 100
-    self.position_y = 180
-}
-```
+`change_scene(...)` encola el cambio y lo aplica al final del frame.
 
-## Acceso a otros nodos
+## Errores
 
-Desde GOS puedes usar funciones del runtime como:
+Los errores del runtime intentan incluir:
 
-- `get_root()`
-- `get_node("Ruta/Del/Nodo")`
-- `load_scene(...)`
-- `change_scene(...)`
+- archivo
+- funcion
+- linea
 
-## Alcance actual
-
-GOS ya sirve para gameplay basico y scripting de escenas. Si necesitas una capacidad concreta, revisa primero el parser y el interprete para confirmar si esa sintaxis ya existe.
+Esto hace mas facil localizar problemas sin entrar al codigo Python del motor.

@@ -4,12 +4,11 @@ from egas.core.logger import Logger
 
 
 class RuntimeServices:
-    """
-    Registro global minimo para exponer servicios del runtime a GOS.
-    """
+    """Registro global minimo para exponer servicios del runtime a GOS."""
 
     scene_tree = None
     resource_manager = None
+    _pending_scene_path = None
 
     @classmethod
     def configure(cls, scene_tree, resource_manager):
@@ -25,6 +24,18 @@ class RuntimeServices:
 
     @classmethod
     def change_scene(cls, scene_path: str):
+        cls._pending_scene_path = scene_path
+        Logger.info("RuntimeServices", f"Cambio de escena encolado para '{scene_path}'.")
+        return scene_path
+
+    @classmethod
+    def flush_pending_scene_change(cls):
+        if cls._pending_scene_path is None:
+            return None
+
+        scene_path = cls._pending_scene_path
+        cls._pending_scene_path = None
+
         if cls.scene_tree is None or cls.resource_manager is None:
             Logger.error("RuntimeServices", "No hay runtime activo para cambiar de escena.")
             return None
@@ -45,12 +56,8 @@ class RuntimeServices:
 
     @classmethod
     def get_root(cls):
-        if cls.scene_tree is None:
-            return None
-        return cls.scene_tree.get_root()
+        return None if cls.scene_tree is None else cls.scene_tree.get_root()
 
     @classmethod
     def get_node(cls, node_path: str):
-        if cls.scene_tree is None:
-            return None
-        return cls.scene_tree.get_node(node_path)
+        return None if cls.scene_tree is None else cls.scene_tree.get_node(node_path)
