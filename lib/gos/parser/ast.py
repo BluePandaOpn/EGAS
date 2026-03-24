@@ -64,6 +64,21 @@ class SetExpr(Expr):
         self.value = value
 
 
+class IndexExpr(Expr):
+    def __init__(self, obj: Expr, index: Expr, bracket: Token):
+        self.obj = obj
+        self.index = index
+        self.bracket = bracket
+
+
+class IndexSetExpr(Expr):
+    def __init__(self, obj: Expr, index: Expr, value: Expr, bracket: Token):
+        self.obj = obj
+        self.index = index
+        self.value = value
+        self.bracket = bracket
+
+
 class ListExpr(Expr):
     def __init__(self, items: List[Expr]):
         self.items = items
@@ -109,6 +124,13 @@ class WhileStmt(Stmt):
         self.body = body
 
 
+class ForEachStmt(Stmt):
+    def __init__(self, iterator: Token, iterable: Expr, body: Stmt):
+        self.iterator = iterator
+        self.iterable = iterable
+        self.body = body
+
+
 class FunctionStmt(Stmt):
     def __init__(self, name: Token, params: List[Token], body: List[Stmt]):
         self.name = name
@@ -120,6 +142,16 @@ class ReturnStmt(Stmt):
     def __init__(self, keyword: Token, value: Optional[Expr]):
         self.keyword = keyword
         self.value = value
+
+
+class BreakStmt(Stmt):
+    def __init__(self, keyword: Token):
+        self.keyword = keyword
+
+
+class ContinueStmt(Stmt):
+    def __init__(self, keyword: Token):
+        self.keyword = keyword
 
 
 class ImportStmt(Stmt):

@@ -38,6 +38,9 @@
 - `abs(valor)`
 - `min(...)`
 - `max(...)`
+- `range(fin)` / `range(inicio, fin)` / `range(inicio, fin, paso)`
+- `contains(coleccion, valor)`
+- `type_of(valor)`
 - `append(lista, valor)`
 - `pop(lista, indice?)`
 - `keys(diccionario)`

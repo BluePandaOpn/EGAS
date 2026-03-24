@@ -11,15 +11,20 @@ from lib.gos.lexer.token import Token, TokenType
 from lib.gos.objects.instance import GosInstance
 from lib.gos.parser.ast import (
     BinaryExpr,
+    BreakStmt,
     BlockStmt,
     CallExpr,
     ConstStmt,
+    ContinueStmt,
     DictExpr,
     ExpressionStmt,
+    ForEachStmt,
     FunctionStmt,
     GetExpr,
     GroupingExpr,
     IfStmt,
+    IndexExpr,
+    IndexSetExpr,
     ImportStmt,
     ListExpr,
     LiteralExpr,
@@ -43,6 +48,7 @@ class Interpreter:
     def __init__(self, script_path: str | None = None):
         self.script_path = script_path
         self.current_function = None
+        self.loop_depth = 0
         self.globals = Environment()
         self.environment = self.globals
         self._load_builtins()
@@ -87,14 +93,60 @@ class Interpreter:
             elif stmt.else_branch:
                 self._execute(stmt.else_branch)
         elif isinstance(stmt, WhileStmt):
-            while self._is_truthy(self._evaluate(stmt.condition)):
-                self._execute(stmt.body)
+            self.loop_depth += 1
+            try:
+                while self._is_truthy(self._evaluate(stmt.condition)):
+                    try:
+                        self._execute(stmt.body)
+                    except ContinueSignal:
+                        continue
+                    except BreakSignal:
+                        break
+            finally:
+                self.loop_depth -= 1
+        elif isinstance(stmt, ForEachStmt):
+            self._execute_for_each(stmt)
         elif isinstance(stmt, FunctionStmt):
             self.environment.define(stmt.name.lexeme, stmt, is_const=True)
         elif isinstance(stmt, ReturnStmt):
             raise ReturnException(self._evaluate(stmt.value) if stmt.value else None)
+        elif isinstance(stmt, BreakStmt):
+            if self.loop_depth <= 0:
+                raise GOSRuntimeError("No se puede usar 'break' fuera de un bucle.", line=stmt.keyword.line)
+            raise BreakSignal()
+        elif isinstance(stmt, ContinueStmt):
+            if self.loop_depth <= 0:
+                raise GOSRuntimeError("No se puede usar 'continue' fuera de un bucle.", line=stmt.keyword.line)
+            raise ContinueSignal()
         elif isinstance(stmt, ImportStmt):
             self._execute_import(stmt)
+
+    def _execute_for_each(self, stmt: ForEachStmt):
+        iterable = self._evaluate(stmt.iterable)
+        if isinstance(iterable, dict):
+            sequence = list(iterable.keys())
+        else:
+            try:
+                sequence = list(iterable)
+            except TypeError as exc:
+                raise GOSRuntimeError(
+                    f"El valor de 'for' no es iterable: {type(iterable).__name__}: {exc}",
+                    line=stmt.iterator.line,
+                )
+
+        self.loop_depth += 1
+        try:
+            for item in sequence:
+                loop_env = Environment(self.environment)
+                loop_env.define(stmt.iterator.lexeme, item)
+                try:
+                    self._execute_block([stmt.body], loop_env)
+                except ContinueSignal:
+                    continue
+                except BreakSignal:
+                    break
+        finally:
+            self.loop_depth -= 1
 
     def _execute_import(self, stmt: ImportStmt):
         source_path = self._evaluate(stmt.path)
@@ -147,6 +199,10 @@ class Interpreter:
             return self._get_property(self._evaluate(expr.obj), expr.name)
         if isinstance(expr, SetExpr):
             return self._evaluate_set(expr)
+        if isinstance(expr, IndexExpr):
+            return self._evaluate_index(expr)
+        if isinstance(expr, IndexSetExpr):
+            return self._evaluate_index_set(expr)
         if isinstance(expr, ListExpr):
             return [self._evaluate(item) for item in expr.items]
         if isinstance(expr, DictExpr):
@@ -191,6 +247,10 @@ class Interpreter:
                 if right == 0:
                     raise GOSRuntimeError("Division por cero.", line=expr.operator.line)
                 return left / right
+            if operator == TokenType.PERCENT:
+                if right == 0:
+                    raise GOSRuntimeError("Modulo por cero.", line=expr.operator.line)
+                return left % right
             if operator == TokenType.GREATER:
                 return left > right
             if operator == TokenType.GREATER_EQUALS:
@@ -252,6 +312,44 @@ class Interpreter:
             self.environment.assign(expr.name, value)
             return value
         return self._set_property(self._evaluate(expr.obj), expr.name, value)
+
+    def _evaluate_index(self, expr: IndexExpr):
+        obj = self._evaluate(expr.obj)
+        index = self._evaluate(expr.index)
+        try:
+            if isinstance(obj, dict):
+                return obj[index]
+            if isinstance(obj, (list, tuple, str)):
+                return obj[int(index)]
+        except (KeyError, IndexError, ValueError, TypeError) as exc:
+            raise GOSRuntimeError(f"Indice invalido: {exc}", line=expr.bracket.line)
+
+        raise GOSRuntimeError(
+            f"El tipo {type(obj).__name__} no soporta indexacion.",
+            line=expr.bracket.line,
+        )
+
+    def _evaluate_index_set(self, expr: IndexSetExpr):
+        obj = self._evaluate(expr.obj)
+        index = self._evaluate(expr.index)
+        value = self._evaluate(expr.value)
+
+        try:
+            if isinstance(obj, dict):
+                obj[index] = value
+                return value
+            if isinstance(obj, list):
+                obj[int(index)] = value
+                return value
+            if isinstance(obj, str):
+                raise GOSRuntimeError("Las cadenas son de solo lectura.", line=expr.bracket.line)
+        except (IndexError, ValueError, TypeError) as exc:
+            raise GOSRuntimeError(f"No se pudo asignar por indice: {exc}", line=expr.bracket.line)
+
+        raise GOSRuntimeError(
+            f"El tipo {type(obj).__name__} no soporta asignacion por indice.",
+            line=expr.bracket.line,
+        )
 
     def _get_property(self, obj: Any, name_token: Token) -> Any:
         property_name = name_token.lexeme
@@ -343,3 +441,11 @@ _PROPERTY_NOT_FOUND = object()
 class ReturnException(Exception):
     def __init__(self, value):
         self.value = value
+
+
+class BreakSignal(Exception):
+    pass
+
+
+class ContinueSignal(Exception):
+    pass

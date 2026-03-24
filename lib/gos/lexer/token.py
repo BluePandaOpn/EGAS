@@ -11,6 +11,7 @@ class TokenType(Enum):
     MINUS = auto()      # -
     STAR = auto()       # *
     SLASH = auto()      # /
+    PERCENT = auto()    # %
     PIPE = auto()       # |
     EQUALS = auto()     # =
     EQUALS_EQUALS = auto() # ==
@@ -42,6 +43,9 @@ class TokenType(Enum):
     ELSE = auto()       # else
     WHILE = auto()      # while
     FOR = auto()        # for
+    IN = auto()         # in
+    BREAK = auto()      # break
+    CONTINUE = auto()   # continue
     RETURN = auto()     # return
     AND = auto()        # and
     OR = auto()         # or
