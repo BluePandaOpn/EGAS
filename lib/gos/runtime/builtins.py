@@ -144,6 +144,32 @@ class BuiltInFunctions:
         return max(values)
 
     @staticmethod
+    def range_value(*args):
+        if len(args) == 1:
+            start, stop, step = 0, int(args[0]), 1
+        elif len(args) == 2:
+            start, stop = int(args[0]), int(args[1])
+            step = 1
+        elif len(args) == 3:
+            start, stop, step = int(args[0]), int(args[1]), int(args[2])
+        else:
+            raise ValueError("range espera 1, 2 o 3 argumentos.")
+
+        if step == 0:
+            raise ValueError("range no permite paso 0.")
+        return list(range(start, stop, step))
+
+    @staticmethod
+    def contains_value(collection, value):
+        return value in collection
+
+    @staticmethod
+    def type_of(value):
+        if value is None:
+            return "nil"
+        return type(value).__name__
+
+    @staticmethod
     def append_value(collection, value):
         collection.append(value)
         return collection
@@ -205,6 +231,9 @@ BUILTINS = {
     "abs": BuiltInFunctions.abs_value,
     "min": BuiltInFunctions.min_value,
     "max": BuiltInFunctions.max_value,
+    "range": BuiltInFunctions.range_value,
+    "contains": BuiltInFunctions.contains_value,
+    "type_of": BuiltInFunctions.type_of,
     "append": BuiltInFunctions.append_value,
     "pop": BuiltInFunctions.pop_value,
     "keys": BuiltInFunctions.keys_value,

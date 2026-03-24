@@ -16,6 +16,9 @@ class Lexer:
         "else": TokenType.ELSE,
         "while": TokenType.WHILE,
         "for": TokenType.FOR,
+        "in": TokenType.IN,
+        "break": TokenType.BREAK,
+        "continue": TokenType.CONTINUE,
         "return": TokenType.RETURN,
         "and": TokenType.AND,
         "or": TokenType.OR,
@@ -76,6 +79,8 @@ class Lexer:
             self._add_token(TokenType.MINUS)
         elif c == "*":
             self._add_token(TokenType.STAR)
+        elif c == "%":
+            self._add_token(TokenType.PERCENT)
         elif c == "|":
             self._add_token(TokenType.PIPE)
         elif c == "!":

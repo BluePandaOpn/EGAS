@@ -16,6 +16,35 @@ func _process(delta) {
 }
 ```
 
+## Bucles mas expresivos
+
+```javascript
+var puntos = [10, 20, 30]
+var total = 0
+
+for (p in puntos) {
+    if (p <= 0) {
+        continue
+    }
+
+    total = total + p
+
+    if (total >= 30) {
+        break
+    }
+}
+```
+
+## Colecciones por indice
+
+```javascript
+var inventario = ["espada", "pocion"]
+var stats = { "hp": 100, "mp": 20 }
+
+print(inventario[0])
+stats["hp"] = stats["hp"] - 10
+```
+
 ## Elementos soportados
 
 - `var`
@@ -23,11 +52,16 @@ func _process(delta) {
 - `func`
 - `if / elif / else`
 - `while`
+- `for (item in coleccion)`
+- `break`
+- `continue`
 - `return`
 - llamadas a funciones
 - acceso a propiedades con `.`
 - asignacion a propiedades
-- operadores `+ - * /`
+- acceso por indice con `[]`
+- asignacion por indice en listas y diccionarios
+- operadores `+ - * / %`
 - comparaciones `> >= < <= == !=`
 - operadores `and`, `or`, `not`
 - operador `|`

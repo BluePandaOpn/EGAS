@@ -3,15 +3,20 @@ from typing import List, Optional
 from lib.gos.lexer.token import Token, TokenType
 from lib.gos.parser.ast import (
     BinaryExpr,
+    BreakStmt,
     BlockStmt,
     CallExpr,
+    ContinueStmt,
     ConstStmt,
     DictExpr,
     ExpressionStmt,
+    ForEachStmt,
     FunctionStmt,
     GetExpr,
     GroupingExpr,
     IfStmt,
+    IndexExpr,
+    IndexSetExpr,
     ImportStmt,
     ListExpr,
     LiteralExpr,
@@ -84,6 +89,12 @@ class Parser:
             return self._if_statement()
         if self._match(TokenType.WHILE):
             return self._while_statement()
+        if self._match(TokenType.FOR):
+            return self._for_statement()
+        if self._match(TokenType.BREAK):
+            return BreakStmt(self._previous())
+        if self._match(TokenType.CONTINUE):
+            return ContinueStmt(self._previous())
         if self._match(TokenType.RETURN):
             return self._return_statement()
         if self._match(TokenType.LBRACE):
@@ -124,6 +135,14 @@ class Parser:
         self._consume(TokenType.RPAREN, "Se esperaba ')' despues de la condicion.")
         return WhileStmt(condition, self._statement())
 
+    def _for_statement(self):
+        self._consume(TokenType.LPAREN, "Se esperaba '(' despues de 'for'.")
+        iterator = self._consume(TokenType.IDENTIFIER, "Se esperaba el nombre de la variable iteradora.")
+        self._consume(TokenType.IN, "Se esperaba 'in' dentro del for.")
+        iterable = self._expression()
+        self._consume(TokenType.RPAREN, "Se esperaba ')' despues del iterable.")
+        return ForEachStmt(iterator, iterable, self._statement())
+
     def _return_statement(self):
         keyword = self._previous()
         value = None
@@ -155,6 +174,8 @@ class Parser:
                 return SetExpr(VariableExpr(expr.name), expr.name, value)
             if isinstance(expr, GetExpr):
                 return SetExpr(expr.obj, expr.name, value)
+            if isinstance(expr, IndexExpr):
+                return IndexSetExpr(expr.obj, expr.index, value, expr.bracket)
 
             raise GOSParserError("Objetivo de asignacion invalido.", line=equals.line)
 
@@ -192,7 +213,7 @@ class Parser:
 
     def _factor(self):
         expr = self._unary()
-        while self._match(TokenType.SLASH, TokenType.STAR):
+        while self._match(TokenType.SLASH, TokenType.STAR, TokenType.PERCENT):
             expr = BinaryExpr(expr, self._previous(), self._unary())
         return expr
 
@@ -210,6 +231,10 @@ class Parser:
             elif self._match(TokenType.DOT):
                 name = self._consume(TokenType.IDENTIFIER, "Se esperaba un nombre de propiedad despues de '.'.")
                 expr = GetExpr(expr, name)
+            elif self._match(TokenType.LBRACKET):
+                index = self._expression()
+                bracket = self._consume(TokenType.RBRACKET, "Se esperaba ']' despues del indice.")
+                expr = IndexExpr(expr, index, bracket)
             else:
                 break
         return expr
